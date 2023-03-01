@@ -1,0 +1,15 @@
+.emails-page-div-general {
+  width: 100%;
+  height: calc(100vh - 80px);
+  background-color: grey;
+  border-radius: 20px !important;
+  min-width: 900px;
+  margin-left: 10px;
+  opacity: .8;
+}
+
+.line-divider-div {
+  width: 40%;
+  border: .5px solid lightgrey;
+  opacity: .5;
+}

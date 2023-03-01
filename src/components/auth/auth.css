@@ -1,0 +1,16 @@
+.login-fullpage-div {
+  height: 100vh !important;
+  width: 100vw !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-paper {
+  width: min(550px, calc(100% - 30px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 35px;
+}
