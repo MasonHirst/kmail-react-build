@@ -14,7 +14,13 @@ const darkModeOn = createTheme({
     },
     secondary: {
       main: '#2F2F2F',
-    }
+    },
+    blueBtn: {
+      main: '#1D66C9'
+    },
+    whiteColor: {
+      main: '#FFFFFF'
+    },
   },
   
 })

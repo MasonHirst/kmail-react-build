@@ -41,8 +41,16 @@ import Paper from '@mui/material/Paper'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import TextField from '@mui/material/TextField'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import Link from '@mui/material/Link'
+import Stack from '@mui/material/Stack'
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 let muiStyles = {
+  FormControlLabel,
+  Switch,
+  Stack,
+  Link,
   KeyboardArrowRightIcon,
   TextField,
   ChevronLeftIcon,

@@ -7,10 +7,16 @@
 }
 
 .login-paper {
-  width: min(550px, calc(100% - 30px));
+  width: min(450px, calc(100% - 30px));
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
-  padding: 35px;
+  gap: 12px;
+  padding: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.165);
+  border-radius: 8px !important;
 }
+
+
+
+

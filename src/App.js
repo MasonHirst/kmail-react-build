@@ -16,7 +16,7 @@ function App() {
     >
       <Routes>
         <Route path='/' element={<AllMenus />} />
-        <Route path='authenticate' element={<AllAuth />} />
+        <Route path='login' element={<AllAuth />} />
       </Routes>
     </div>
   )

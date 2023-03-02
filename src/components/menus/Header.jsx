@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import muiStyles from '../../styles/muiStyles'
-import K_logo from '../../assets/DALLE-K-logo.png'
+import K_logo from '../../assets/DALLE-K-logo.svg'
 const {
   MenuIcon,
   Typography,
