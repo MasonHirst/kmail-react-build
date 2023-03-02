@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DarkModeContext } from '../../context/DarkThemeContext'
 import muiStyles from '../../styles/muiStyles'
@@ -9,6 +9,8 @@ const { Button, Paper, TextField, Typography, Link, Stack, FormControlLabel, Swi
 const Login = () => {
   const { darkTheme, setDarkTheme } = useContext(DarkModeContext)
   const navigate = useNavigate()
+  const inputRef = useRef()
+  
   
   return (
     <Paper elevation={0} className="login-paper">
@@ -30,7 +32,7 @@ const Login = () => {
           gap: 9,
         }}
       >
-        <TextField fullWidth color={darkTheme ? 'whiteColor' : 'primary'}  label="Email or phone" />
+        <TextField inputRef={inputRef} fullWidth color={darkTheme ? 'whiteColor' : 'primary'}  label="Email or phone" />
         <Link
           style={{ fontWeight: 'bold', fontSize: '14px' }}
           href="recover_email"
@@ -41,7 +43,7 @@ const Login = () => {
       </div>
       <Stack
         sx={{
-          margin: '35px 0px',
+          margin: '35px 0 0 0',
           width: '100%',
           display: 'flex',
           flexDirection: 'row',

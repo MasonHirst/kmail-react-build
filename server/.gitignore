@@ -2,6 +2,7 @@
 logs
 *.log
 
+.DS_Store
 # Runtime data
 pids
 *.pid
@@ -110,3 +111,6 @@ $RECYCLE.BIN/
 # Others
 lib/
 data/
+
+node_modules
+.env
