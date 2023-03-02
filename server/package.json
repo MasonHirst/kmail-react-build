@@ -1,15 +1,51 @@
 {
-  "name": "server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "kmail-server",
+  "description": "Kmail server will handle database queries and authentication",
+  "version": "0.0.0",
+  "homepage": "",
+  "main": "src",
+  "keywords": [
+    "feathers"
+  ],
+  "author": {
+    "name": "Mason Hirst",
+    "email": "mhirstdev@gmail.com"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "contributors": [],
+  "bugs": {},
+  "directories": {
+    "lib": "src",
+    "test": "test/"
+  },
+  "engines": {
+    "node": ">= 6.0.0",
+    "npm": ">= 3.0.0"
+  },
+  "scripts": {
+    "test": "npm run eslint && npm run mocha",
+    "eslint": "eslint src/. test/. --config .eslintrc.json",
+    "start": "node src/",
+    "mocha": "mocha test/ --recursive --exit"
+  },
   "dependencies": {
-    "@feathersjs/feathers": "^5.0.0"
+    "body-parser": "^1.20.2",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "feathers": "^2.2.4",
+    "feathers-configuration": "^0.4.2",
+    "feathers-errors": "^2.9.2",
+    "feathers-hooks": "^2.1.2",
+    "feathers-hooks-common": "^7.0.0",
+    "feathers-rest": "^1.8.1",
+    "feathers-socketio": "^2.0.1",
+    "helmet": "^6.0.1",
+    "serve-favicon": "^2.5.0",
+    "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.35.0",
+    "mocha": "^10.2.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
   }
 }
