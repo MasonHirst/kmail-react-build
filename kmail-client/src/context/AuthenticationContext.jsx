@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react'
-import { getUser } from '../data'
+import AllMenus from '../components/menus/AllMenus'
+import Login from '../components/auth/Login'
 import AllAuth from '../components/menus/AllMenus'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import axios from 'axios'
@@ -30,6 +31,11 @@ export function Authentication({ children }) {
     window.location.reload(false)
   }
 
+  // useEffect(() => {
+  //   localStorage.setItem('jwtAccessToken', accessToken)
+  //   axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtAccessToken')
+  // }, [accessToken])
+
   useEffect(() => {
     ;(async () => {
       try {
@@ -50,16 +56,16 @@ export function Authentication({ children }) {
   useEffect(() => {
     if (user && accessToken) setAuthState(AUTHENTICATED)
   }, [user, accessToken])
-  console.log({authState});
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, children, accessToken, setAccessToken, isLoading, setIsLoading }}>
-      {authState === AUTHENTICATED ? (children) : (
+    <AuthContext.Provider value={{ user, authState, setUser, logout, children, accessToken, setAccessToken, isLoading, setIsLoading }}>
+      {/* {authState !== AUTHENTICATED ? (children) : (
         <Routes>
-          <Route path='authenticate/*' element={<AllAuth />} />
+          <Route path='authenticate' element={<AllAuth />} />
+          <Route path='authenticate' element={<Login />} />
         </Routes>
-      )}
-      {/* {children} */}
+      )} */}
+      {children}
     </AuthContext.Provider>
   )
 }

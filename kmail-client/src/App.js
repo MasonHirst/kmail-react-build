@@ -1,28 +1,33 @@
-import React from 'react'
+import React, { useContext } from 'react'
 // eslint-disable-next-line
 import { Routes, Route, Navigate } from 'react-router-dom'
 import AllMenus from './components/menus/AllMenus'
 import AllAuth from './components/auth/AllAuth'
-
-import { Authentication } from './context/AuthenticationContext'
+import { AuthContext } from './context/AuthenticationContext'
 import './reset.css'
 
 function App() {
+  const { authState } = useContext(AuthContext)
+
   return (
-    <Authentication>
-      <div
-        className="App"
-        style={{
-          minHeight: '100vh',
-        }}
-      >
+    <div
+      className="App"
+      style={{
+        minHeight: '100vh',
+      }}
+    >
+      {authState === 'AUTHENTICATED' ? (
         <Routes>
-          {/* <Route path="authenticate/*" element={<AllAuth />} /> */}
           <Route path="/" element={<AllMenus />} />
-          <Route path='*' element={<Navigate to={'/'} />} />
+          <Route path="*" element={<Navigate to='/' />} />
         </Routes>
-      </div>
-    </Authentication>
+      ) : (
+        <Routes>
+          <Route path="authenticate/*" element={<AllAuth />} />
+          <Route path="*" element={<Navigate to="authenticate/login" />} />
+        </Routes>
+      )}
+    </div>
   )
 }
 

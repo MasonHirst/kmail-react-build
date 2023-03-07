@@ -45,10 +45,21 @@ const LoginPassword = () => {
         .post('verify/login', { username: usernameState, password: input })
         .then(({ data }) => {
           setIsLoading(false)
-          console.log(data)
           setAccessToken(data.accessToken)
           setUser(data.user)
           localStorage.setItem('jwtAccessToken', data.accessToken)
+
+          let usersArray = localStorage.getItem('localUsersArray')
+          console.log('localUsersArray: ', usersArray)
+          if (usersArray) {
+            const newArray = JSON.parse(usersArray)
+            console.log({newArray})
+            if (!newArray.includes(data.user.id)) {
+              let newUsersArr = [...newArray, data.user.id]
+              console.log({newUsersArr})
+              localStorage.setItem('localUsersArray', newUsersArr)
+            }
+          } else localStorage.setItem('localUsersArray', JSON.stringify([data.user.id]))
         })
         .catch(err => {
           setIsLoading(false)
@@ -62,7 +73,7 @@ const LoginPassword = () => {
       handleClick()
     }
   }
-  setIsLoading(true)
+
 
   return (
     <Paper elevation={0} className="login-paper">

@@ -24,14 +24,14 @@ User.hasMany(Contact)
 Contact.belongsTo(User, { foreignKey: 'contact_id' })
 
 //! Endpoints
-const { checkUsernameAvailability, createAccount, findProfilePic, verifyLogin } = require('./controllers/authController')
+const { checkUsernameAvailability, createAccount, findProfilePic, getUser, verifyLogin } = require('./controllers/authController')
 
 // Unauthenticated endpoints
 app.get('/validate/username/:username', checkUsernameAvailability)
 app.post('/verify/login', verifyLogin)
 app.get('/accounts/picture/:username', findProfilePic)
 app.post('/accounts/create', createAccount)
-app.post('/accounts/users', )
+app.get('/accounts/users', getUser)
 
 // Authenticated endpoints
 

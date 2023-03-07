@@ -30,7 +30,6 @@ function verifyAccessToken(token) {
 
 module.exports = {
   checkUsernameAvailability: async (req, res) => {
-    console.log('token: ', req.headers.authorization)
     try {
       let usernameTaken = await User.findAll({
         where: { username: req.params.username },
@@ -101,4 +100,19 @@ module.exports = {
       res.status(403).send(err)
     }
   },
+
+  getUser: async (req, res) => {
+    const accessToken = req.headers.authorization
+    console.log('token: ', accessToken)
+    try {
+      const { sub } = await verifyAccessToken(accessToken)
+      console.log({sub})
+      if (!sub) throw new Error('unauthorized')
+      let user = await User.findOne({ where: { id: sub }})
+      delete user.dataValues.hashed_pass
+      return res.send(user)
+    } catch (err) {
+      res.status(403).send(err)
+    }
+  }
 }

@@ -6,9 +6,11 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { DarkModeProvider, DarkModeContext } from './context/DarkThemeContext'
 import axios from 'axios'
+import { Authentication } from './context/AuthenticationContext'
 
 axios.defaults.baseURL = 'http://localhost:8080/'
-axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtAccessToken')
+axios.defaults.headers.common['Authorization'] =
+  localStorage.getItem('jwtAccessToken')
 
 const darkModeOn = createTheme({
   palette: {
@@ -38,17 +40,17 @@ const root = ReactDOM.createRoot(document.getElementById('root'))
 
 root.render(
   <BrowserRouter>
-        <DarkModeProvider>
-          <DarkModeContext.Consumer>
-            {(context) => (
-              <ThemeProvider
-                theme={context.darkTheme ? darkModeOn : lightModeOn}
-              >
-                <CssBaseline />
-                <App />
-              </ThemeProvider>
-            )}
-          </DarkModeContext.Consumer>
-        </DarkModeProvider>
+    <DarkModeProvider>
+      <DarkModeContext.Consumer>
+        {(context) => (
+          <ThemeProvider theme={context.darkTheme ? darkModeOn : lightModeOn}>
+            <CssBaseline />
+            <Authentication>
+              <App />
+            </Authentication>
+          </ThemeProvider>
+        )}
+      </DarkModeContext.Consumer>
+    </DarkModeProvider>
   </BrowserRouter>
 )
