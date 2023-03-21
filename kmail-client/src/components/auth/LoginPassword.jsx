@@ -21,48 +21,49 @@ const {
 
 const LoginPassword = () => {
   const { darkTheme } = useContext(DarkModeContext)
-  const { isLoading, setIsLoading, setAccessToken, setUser } = useContext(AuthContext)
+  const { isDeepLoading, setIsDeepLoading, setAccessToken, setUser } = useContext(AuthContext)
   const navigate = useNavigate()
   const location = useLocation()
   const inputRef = useRef()
   const [picUrl, setpicUrl] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [usernameState, setUsernameState] = useState(location.state.username)
+  const { username } = location.state
 
   useEffect(() => {
-    axios.get(`/accounts/picture/${usernameState}`).then(({ data }) => {
-      setpicUrl(data)
+    axios.get(`/accounts/picture/${username}`).then(({ data }) => {
+      setpicUrl(data.profile_pic)
     })
-  }, [])
+    .catch(err => {
+      console.error('ERROR IN LOGIN PASSWORD USEEFFECT: ', err)
+    })
+  }, [username])
 
   function handleClick() {
-    if (isLoading) return
+    if (isDeepLoading) return
     let input = inputRef.current.value
     if (input.length > 0) {
-      setIsLoading(true)
+      setIsDeepLoading(true)
       axios
-        .post('verify/login', { username: usernameState, password: input })
+        .post('verify/login', { username: username, password: input })
         .then(({ data }) => {
-          setIsLoading(false)
+          setIsDeepLoading(false)
           setAccessToken(data.accessToken)
           setUser(data.user)
           localStorage.setItem('jwtAccessToken', data.accessToken)
 
+          // store user accounts in localstorage for later logins
           let usersArray = localStorage.getItem('localUsersArray')
-          console.log('localUsersArray: ', usersArray)
           if (usersArray) {
-            const newArray = JSON.parse(usersArray)
-            console.log({newArray})
+            const newArray = JSON.parse(`${usersArray}`)
             if (!newArray.includes(data.user.id)) {
               let newUsersArr = [...newArray, data.user.id]
-              console.log({newUsersArr})
-              localStorage.setItem('localUsersArray', newUsersArr)
+              localStorage.setItem('localUsersArray', JSON.stringify(newUsersArr))
             }
           } else localStorage.setItem('localUsersArray', JSON.stringify([data.user.id]))
         })
         .catch(err => {
-          setIsLoading(false)
+          setIsDeepLoading(false)
           console.error('ERROR IN LOGINPASSWORD', err)
         })
     } else setErrorMessage('Password is required bro')
@@ -89,12 +90,12 @@ const LoginPassword = () => {
         className={`login-dropdown-btn ${darkTheme ? 'btn-dark' : 'btn-light'}`}
       >
         <Avatar
-          sx={{ width: 24, height: 24 }}
-          alt={usernameState}
+          sx={{ width: 24, height: 24, bgcolor: 'purple(500)' }}
+          alt={username}
           src={picUrl}
         />
         <Typography variant="subtitle" sx={{ fontWeight: '600' }}>
-          {usernameState}
+          {username}
         </Typography>
         <ExpandMoreIcon />
       </button>
@@ -165,7 +166,7 @@ const LoginPassword = () => {
           color={darkTheme ? 'blueBtn' : 'primary'}
           variant="contained"
           onClick={handleClick}
-          loading={isLoading}
+          loading={isDeepLoading}
           style={{ textTransform: 'none', width: '75px', fontWeight: 600 }}
         >
           Next

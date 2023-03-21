@@ -1,0 +1,3 @@
+- if you navigate directly to the login/password page (skipping the login page), 
+it errors because the state variable that was passed by react-router does not 
+exist.

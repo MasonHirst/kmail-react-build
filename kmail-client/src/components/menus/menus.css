@@ -122,17 +122,6 @@
   filter: drop-shadow(.7px .7px .7px #666666);
 }
 
-.profile-pic-div {
-  background-color: purple;
-  border-radius: 50%;
-  height: 40px;
-  width: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-}
-
 .rounded-right > * {
   border-top-right-radius: 20px !important;
   border-bottom-right-radius: 20px !important;

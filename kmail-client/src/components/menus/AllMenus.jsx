@@ -1,14 +1,24 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import './menus.css'
 import LeftButtonsMenu from './LeftButtonsMenu'
+import ComposeEmailDialog from '../emails/ComposeEmailDialog'
 import AllEmails from '../emails/AllEmails'
 import RightMenuBar from './RightMenuBar'
 import Header from './Header.jsx'
 import muiStyles from '../../styles/muiStyles'
+import { AuthContext } from '../../context/AuthenticationContext'
+import { DarkModeContext } from '../../context/DarkThemeContext'
 const { Button, CreateOutlinedIcon } = muiStyles
 
 const AllMenus = () => {
+  const { user } = useContext(AuthContext)
+  const { darkTheme, setDarkTheme } = useContext(DarkModeContext)
   const imagePath = 'https://drive.google.com/uc?export=view&id=1TBx3mnoBpKI3RzCLzzO414Su0m_PCpX_'
+  const [showComposeDialog, setShowComposeDialog] = useState(false)
+  
+  useEffect(() => {
+    setDarkTheme(user.dark_mode)
+  }, [user])
   
   return (
     <div
@@ -31,6 +41,9 @@ const AllMenus = () => {
               disableElevation={true}
               variant="contained"
               size="large"
+              onClick={() => {
+                if (!showComposeDialog) setShowComposeDialog(true)
+              }}
               startIcon={<CreateOutlinedIcon />}
               style={{
                 backgroundColor: 'white',
@@ -50,6 +63,7 @@ const AllMenus = () => {
           </div>
           <AllEmails />
           <RightMenuBar />
+          {showComposeDialog && <ComposeEmailDialog showComposeDialog={showComposeDialog} setShowComposeDialog={setShowComposeDialog} />}
         </div>
       </div>
     </div>

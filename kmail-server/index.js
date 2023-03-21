@@ -17,29 +17,45 @@ app.use(express.json())
 app.use(cors())
 
 //! Relationships
-Message.belongsTo(User, { foreignKey: 'sender_id' });
-Message.belongsTo(User, { foreignKey: 'recipient_id' });
+Message.belongsTo(User, { foreignKey: 'sender_id' })
+Message.belongsTo(User, { foreignKey: 'recipient_id' })
 
 User.hasMany(Contact)
 Contact.belongsTo(User, { foreignKey: 'contact_id' })
 
 //! Endpoints
-const { checkUsernameAvailability, createAccount, findProfilePic, getUser, verifyLogin } = require('./controllers/authController')
+const {
+  checkUsernameAvailability,
+  createAccount,
+  validateToken,
+  findProfilePic,
+  getUser,
+  registerUser,
+  updateProfilePic,
+  verifyLogin,
+  getLocalUser,
+} = require('./controllers/authController')
+// const { getEmails } = require('./controllers/emailApiController')
+const { getLabels } = require('./emailFetch')
 
-// Unauthenticated endpoints
+// Unprotected endpoints
 app.get('/validate/username/:username', checkUsernameAvailability)
 app.post('/verify/login', verifyLogin)
 app.get('/accounts/picture/:username', findProfilePic)
 app.post('/accounts/create', createAccount)
-app.get('/accounts/users', getUser)
+app.get('/accounts/local/:id', getLocalUser)
+app.put('/accounts/update/picture', updateProfilePic)
 
-// Authenticated endpoints
-
+// Protected endpoints
+app.get('/accounts/users', validateToken, getUser)
+app.get('/user/emails/get/all', getLabels)
 
 //! Server listen
 const { SERVER_PORT } = process.env
 db.sync()
-// db.sync({force: true})
+  // db.sync({ force: true })
   .then(() => {
-    app.listen(SERVER_PORT, () => console.log(`SERVER RUNNING ON SERVER_PORT ${SERVER_PORT}`))
+    app.listen(SERVER_PORT, () =>
+      console.log(`SERVER RUNNING ON SERVER_PORT ${SERVER_PORT}`)
+    )
   })

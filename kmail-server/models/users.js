@@ -8,6 +8,14 @@ const User = db.define('user', {
     primaryKey: true,
     allowNull: false,
   },
+  first_name: {
+    type: DataTypes.STRING({ length: 25 }),
+    allowNull: false,
+  },
+  last_name: {
+    type: DataTypes.STRING({ length: 25 }),
+    allowNull: false,
+  },
   username: {
     type: DataTypes.STRING({ length: 35 }),
     allowNull: false,
@@ -17,7 +25,7 @@ const User = db.define('user', {
     allowNull: false,
   },
   dark_mode: DataTypes.BOOLEAN,
-  profile_pic: DataTypes.STRING({ length: 500 }),
+  profile_pic: DataTypes.STRING({ length: 1000 }),
   api_connected: DataTypes.BOOLEAN,
   admin: DataTypes.BOOLEAN,
   one_time_pass: DataTypes.STRING({ length: 500 }),

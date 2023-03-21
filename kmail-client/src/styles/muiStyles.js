@@ -50,8 +50,12 @@ import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import Avatar from '@mui/material/Avatar'
+import Card from '@mui/material/Card'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 let muiStyles = {
+  Card,
+  HelpOutlineIcon,
   Avatar,
   AccountCircleOutlinedIcon,
   FormGroup,

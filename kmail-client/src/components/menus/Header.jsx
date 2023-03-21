@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import muiStyles from '../../styles/muiStyles'
 import K_logo from '../../assets/DALLE-K-logo.svg'
+import { AuthContext } from '../../context/AuthenticationContext'
 const {
   MenuIcon,
   Typography,
@@ -11,12 +12,12 @@ const {
   TuneIcon,
   SettingsOutlinedIcon,
   AppsOutlinedIcon,
+  Avatar,
 } = muiStyles
 
 const Header = () => {
   const [searchFocus, setSearchFocus] = useState(false)
-
-  let accountName = 'Mason Hirst'
+  const { user, isDeepLoading, logout } = useContext(AuthContext)
 
   return (
     <div
@@ -46,7 +47,7 @@ const Header = () => {
         <IconButton style={{ padding: '12px', margin: '0 4px' }}>
           <MenuIcon />
         </IconButton>
-        <img src={K_logo} alt="Kmail logo" className='logo-img' />
+        <img src={K_logo} alt="Kmail logo" className="logo-img" />
         <Typography
           variant="subtitle"
           style={{ fontSize: '25px', letterSpacing: '.5px' }}
@@ -56,7 +57,13 @@ const Header = () => {
       </Box>
 
       <Box sx={{ flexGrow: 1 }} className="header-bar-right">
-        <div className={searchFocus ? 'header-search-div-focused' : "header-search-div-unfocused"}>
+        <div
+          className={
+            searchFocus
+              ? 'header-search-div-focused'
+              : 'header-search-div-unfocused'
+          }
+        >
           <IconButton>
             <SearchIcon className={searchFocus ? 'font-grey' : 'font-white'} />
           </IconButton>
@@ -81,12 +88,17 @@ const Header = () => {
           <IconButton>
             <AppsOutlinedIcon />
           </IconButton>
-          <IconButton>
-            <div className="profile-pic-div">
+          <IconButton onClick={logout}>
+            {/* <div className="profile-pic-div">
               <Typography variant='h6'>
-                {accountName.trim().charAt(0).toUpperCase()}
+                {'M'}
               </Typography>
-            </div>
+            </div> */}
+            <Avatar
+              sx={{ width: 40, height: 40 }}
+              alt={user.username}
+              src={user.profile_pic}
+            />
           </IconButton>
         </div>
       </Box>

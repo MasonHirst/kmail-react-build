@@ -13,3 +13,25 @@
   border: .5px solid lightgrey;
   opacity: .5;
 }
+
+.compose-email-dialog {
+  background-color: white !important;
+  color: black !important;
+  position: fixed;
+  right: 70px;
+  /* padding: 10px; */
+  bottom: -10px;
+  padding-bottom: 20px;
+  overflow: hidden;
+  border-radius: 11px !important;
+  width: min(600px, calc(90vw - 70px));
+  height: clamp(300px, 55vw, 600px);
+}
+
+.compose-email-header {
+  background-color: rgb(230, 232, 233);
+  padding: 7px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

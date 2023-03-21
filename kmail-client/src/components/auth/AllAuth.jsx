@@ -1,6 +1,9 @@
 import React, { useEffect, useContext } from 'react'
 import Login from './Login'
 import LoginPassword from './LoginPassword'
+import SelectAccount from './SelectAccount'
+import CreateAccount from './CreateAccount'
+import FinishProfile from './FinishProfile'
 import muiStyles from '../../styles/muiStyles'
 import { DarkModeContext } from '../../context/DarkThemeContext'
 import { Routes, Route } from 'react-router-dom'
@@ -26,8 +29,11 @@ const AllAuth = () => {
   return (
     <Paper className="login-fullpage-div">
       <Routes>
+        <Route path='/' element={<SelectAccount />} />
         <Route path="login" element={<Login />} />
         <Route path="login/password" element={<LoginPassword />} />
+        <Route path="register" element={<CreateAccount />} />
+        <Route path="register/finish" element={<FinishProfile />} />
       </Routes>
 
       <FormControlLabel
