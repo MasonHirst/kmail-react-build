@@ -59,10 +59,10 @@ const FinishProfile = () => {
     window.location.reload()
   }
 
-  let mappedProfileButtons = picsArray.map((url) => {
+  let mappedProfileButtons = picsArray.map((url, index) => {
     return (
       <Avatar
-        key={url}
+        key={index}
         src={url}
         sx={{
           width: 65,

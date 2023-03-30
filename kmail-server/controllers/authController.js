@@ -43,8 +43,10 @@ module.exports = {
       const { sub } = await verifyAccessToken(accessToken)
       if (!sub) return res.status(401).send('bro, your access token is no good')
       if (!accessToken) return res.status(401).send('where is your access token bro?')
+      req.body.userId = sub
       next()
     } catch (err) {
+      console.log(err)
       res.status(403).send(err)
     }
   },
@@ -125,11 +127,8 @@ module.exports = {
     try {
       const { sub } = await verifyAccessToken(accessToken)
       if (!sub) return res.status(200).send('Invalid access token')
-
       const updatedPic = await User.update({ profile_pic: chosenPic }, { where: { id: sub } })
-      console.log({updatedPic})
       res.status(200).send(updatedPic)
-
     } catch (err) {
       res.status(403).send(err)
     }
@@ -159,7 +158,6 @@ module.exports = {
 
   getUser: async (req, res) => {
     const accessToken = req.headers.authorization
-    console.log('token: ', accessToken)
     try {
       const { sub } = await verifyAccessToken(accessToken)
       if (!sub) throw new Error('unauthorized')
@@ -174,7 +172,6 @@ module.exports = {
   getLocalUser: async (req, res) => {
     const {id} = req.params 
     try {
-      console.log(id)
       const user = await User.findOne({ where: { id } })
       const basicUser = {
         username: user.username,

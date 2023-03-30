@@ -52,8 +52,20 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import Avatar from '@mui/material/Avatar'
 import Card from '@mui/material/Card'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import CloseIcon from '@mui/icons-material/Close';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import MarkUnreadChatAltOutlinedIcon from '@mui/icons-material/MarkUnreadChatAltOutlined';
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined';
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 
 let muiStyles = {
+  ArrowBackOutlinedIcon,
+  MoreVertOutlinedIcon,
+  ChatBubbleOutlineOutlinedIcon,
+  ChatOutlinedIcon,
+  MarkUnreadChatAltOutlinedIcon,
+  CloseIcon,
   Card,
   HelpOutlineIcon,
   Avatar,

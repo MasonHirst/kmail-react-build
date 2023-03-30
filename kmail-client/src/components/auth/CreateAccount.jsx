@@ -212,10 +212,9 @@ const CreateAccount = () => {
         </div>
       </form>
 
-      <div className="register-right-div">
+      <div className="register-right-div register-pic">
         <img
           alt="Koogle apps decoration"
-          className="register-pic"
           src="https://ssl.gstatic.com/accounts/signup/glif/account.svg"
           width={244}
           height={244}

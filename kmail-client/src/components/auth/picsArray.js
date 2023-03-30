@@ -47,6 +47,5 @@ export const picsArray = [
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk6xcVqEVyoDqtdlNMz36d5VNI9Z2zb5x2Jfm5Fj3UdB1CG2uFiTKX9I9hVfP5Dj6zgN4&usqp=CAU',
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR716MEekOt_s4lFTMxyZsYIRJXiCQVy-FBmw&usqp=CAU',
   'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmoWuVBfQcnzl3h8u9zt9OwgVtVn34w3WPRg&usqp=CAU',
-  'https://www.jokesforfunny.com/wp-content/uploads/2021/06/0596bdb89b60fe771acd2f5972a9d3e3.jpg',
   
 ]

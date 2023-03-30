@@ -18,7 +18,7 @@ function App() {
     >
       {authState === 'AUTHENTICATED' ? (
         <Routes>
-          <Route path="/" element={<AllMenus />} />
+          <Route path="/*" element={<AllMenus />} />
           <Route path="*" element={<Navigate to='/' />} />
         </Routes>
       ) : (

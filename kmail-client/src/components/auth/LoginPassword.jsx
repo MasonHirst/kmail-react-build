@@ -50,13 +50,16 @@ const LoginPassword = () => {
           setIsDeepLoading(false)
           setAccessToken(data.accessToken)
           setUser(data.user)
+          if (data === 'incorrect username or password') {
+            return setErrorMessage('Incorrect password')
+          }
           localStorage.setItem('jwtAccessToken', data.accessToken)
 
           // store user accounts in localstorage for later logins
           let usersArray = localStorage.getItem('localUsersArray')
           if (usersArray) {
             const newArray = JSON.parse(`${usersArray}`)
-            if (!newArray.includes(data.user.id)) {
+            if (!newArray.includes(data.user?.id)) {
               let newUsersArr = [...newArray, data.user.id]
               localStorage.setItem('localUsersArray', JSON.stringify(newUsersArr))
             }
@@ -74,7 +77,6 @@ const LoginPassword = () => {
       handleClick()
     }
   }
-
 
   return (
     <Paper elevation={0} className="login-paper">

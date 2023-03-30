@@ -1,7 +1,10 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useRef, useEffect } from 'react'
 import muiStyles from '../../styles/muiStyles'
+import { PopupModal } from '../../styles/reusableStyles'
 import K_logo from '../../assets/DALLE-K-logo.svg'
+import { DarkModeContext } from '../../context/DarkThemeContext'
 import { AuthContext } from '../../context/AuthenticationContext'
+import axios from 'axios'
 const {
   MenuIcon,
   Typography,
@@ -13,11 +16,53 @@ const {
   SettingsOutlinedIcon,
   AppsOutlinedIcon,
   Avatar,
+  FormControlLabel,
+  Switch,
+  Button,
 } = muiStyles
 
 const Header = () => {
   const [searchFocus, setSearchFocus] = useState(false)
   const { user, isDeepLoading, logout } = useContext(AuthContext)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const { darkTheme, setDarkTheme } = useContext(DarkModeContext)
+  const settingsRef = useRef(null)
+  const [showProfile, setShowProfile] = useState(false)
+  const profileRef = useRef(null)
+
+  // This use effect closes the settings popup when you click outside it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setShowSettingsModal(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [settingsRef])
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfile(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [profileRef])
+
+  function handleToggleDarkTheme() {
+    setDarkTheme(!darkTheme)
+    axios.put('/user/update/dark_mode', {darkMode: !darkTheme})
+      .then(() => {})
+      .catch(err => {
+        console.error('ERROR IN HEADER: ', err)
+      })
+  }
 
   return (
     <div
@@ -82,24 +127,49 @@ const Header = () => {
           <IconButton>
             <HelpOutlineOutlinedIcon />
           </IconButton>
-          <IconButton>
-            <SettingsOutlinedIcon />
-          </IconButton>
+          <div ref={settingsRef}>
+            <IconButton
+              onClick={() => setShowSettingsModal(!showSettingsModal)}
+            >
+              <SettingsOutlinedIcon />
+            </IconButton>
+            {/* --------------- Show settings modal ----------------- */}
+            {showSettingsModal && (
+              <PopupModal>
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={darkTheme}
+                        color={darkTheme ? 'success' : 'primary'}
+                        onChange={handleToggleDarkTheme}
+                        name="darkMode"
+                      />
+                    }
+                    label="Dark Mode"
+                  />
+                </div>
+              </PopupModal>
+            )}
+          </div>
           <IconButton>
             <AppsOutlinedIcon />
           </IconButton>
-          <IconButton onClick={logout}>
-            {/* <div className="profile-pic-div">
-              <Typography variant='h6'>
-                {'M'}
-              </Typography>
-            </div> */}
-            <Avatar
-              sx={{ width: 40, height: 40 }}
-              alt={user.username}
-              src={user.profile_pic}
-            />
-          </IconButton>
+          <div ref={profileRef}>
+            <IconButton onClick={() => setShowProfile(!showProfile)}>
+              <Avatar
+                sx={{ width: 40, height: 40, color: 'white' }}
+                alt={user.username}
+                src={user.profile_pic}
+              />
+            </IconButton>
+            {showProfile && (
+              <PopupModal>
+                <Typography>{user.first_name + ' ' + user.last_name}</Typography>
+                <Button variant='filled' color={darkTheme ? 'bluBtn' : 'primary'} onClick={logout} sx={{textTransform: 'none'}}>Logout</Button>
+              </PopupModal>
+            )}
+          </div>
         </div>
       </Box>
     </div>

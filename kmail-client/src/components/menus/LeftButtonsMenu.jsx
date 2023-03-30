@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import muiStyles from '../../styles/muiStyles'
+import { useNavigate } from 'react-router-dom'
 import './menus.css'
 import LeftMenuLabelCard from './LeftMenuLabelCard'
 const {
@@ -22,10 +23,13 @@ const {
   IconButton,
   Typography,
   AddIcon,
+  MarkUnreadChatAltOutlinedIcon,
+  ChatOutlinedIcon,
 } = muiStyles
 
 const LeftButtonsMenu = () => {
-  const [selectedIndex, setSelectedIndex] = React.useState(1)
+  const navigate = useNavigate()
+  const [selectedIndex, setSelectedIndex] = React.useState(0)
   const [showMore, setShowMore] = useState(true)
 
   const handleListItemClick = (event, index) => {
@@ -53,16 +57,33 @@ const LeftButtonsMenu = () => {
       >
         <ListItemButton
           selected={selectedIndex === 0}
-          onClick={(event) => handleListItemClick(event, 0)}
+          onClick={(event) => {
+            handleListItemClick(event, 0)
+            navigate('/')
+          }}
         >
           <ListItemIcon>
             <InboxIcon />
           </ListItemIcon>
           <ListItemText className='text' primary="Inbox" />
         </ListItemButton>
+
         <ListItemButton
           selected={selectedIndex === 1}
-          onClick={(event) => handleListItemClick(event, 1)}
+          onClick={(event) => {
+            handleListItemClick(event, 1)
+            navigate('/chats')
+          }}
+        >
+          <ListItemIcon>
+            <ChatOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText className='text' primary="Chats" />
+        </ListItemButton>
+
+        <ListItemButton
+          selected={selectedIndex === 2}
+          onClick={(event) => handleListItemClick(event, 2)}
         >
           <ListItemIcon>
             <StarBorderIcon />
@@ -70,8 +91,8 @@ const LeftButtonsMenu = () => {
           <ListItemText className='text' primary="Starred" />
         </ListItemButton>
         <ListItemButton
-          selected={selectedIndex === 2}
-          onClick={(event) => handleListItemClick(event, 2)}
+          selected={selectedIndex === 3}
+          onClick={(event) => handleListItemClick(event, 3)}
         >
           <ListItemIcon>
             <AccessTimeIcon />
@@ -80,8 +101,8 @@ const LeftButtonsMenu = () => {
         </ListItemButton>
 
         <ListItemButton
-          selected={selectedIndex === 3}
-          onClick={(event) => handleListItemClick(event, 3)}
+          selected={selectedIndex === 4}
+          onClick={(event) => handleListItemClick(event, 4)}
         >
           <ListItemIcon>
             <SendIcon />
@@ -90,8 +111,8 @@ const LeftButtonsMenu = () => {
         </ListItemButton>
 
         <ListItemButton
-          selected={selectedIndex === 4}
-          onClick={(event) => handleListItemClick(event, 4)}
+          selected={selectedIndex === 5}
+          onClick={(event) => handleListItemClick(event, 5)}
         >
           <ListItemIcon>
             <DraftsIcon />
@@ -99,13 +120,12 @@ const LeftButtonsMenu = () => {
           <ListItemText className='text' primary="Drafts" />
         </ListItemButton>
 
-        <ListItemButton>
+        <ListItemButton onClick={() => setShowMore(!showMore)}>
           <ListItemIcon>
             {showMore ? <ExpandMoreIcon /> : <ExpandLessIcon />}
           </ListItemIcon>
           <ListItemText
             primary={showMore ? 'More' : 'Less'}
-            onClick={() => setShowMore(!showMore)}
             className='text'
           />
         </ListItemButton>
@@ -113,8 +133,8 @@ const LeftButtonsMenu = () => {
         {!showMore ? (
           <div>
             <ListItemButton
-              selected={selectedIndex === 5}
-              onClick={(event) => handleListItemClick(event, 5)}
+              selected={selectedIndex === 6}
+              onClick={(event) => handleListItemClick(event, 6)}
             >
               <ListItemIcon>
                 <ScheduleSendIcon />
@@ -123,8 +143,8 @@ const LeftButtonsMenu = () => {
             </ListItemButton>
 
             <ListItemButton
-              selected={selectedIndex === 8}
-              onClick={(event) => handleListItemClick(event, 8)}
+              selected={selectedIndex === 7}
+              onClick={(event) => handleListItemClick(event, 7)}
             >
               <ListItemIcon>
                 <MessageIcon />
@@ -133,8 +153,8 @@ const LeftButtonsMenu = () => {
             </ListItemButton>
 
             <ListItemButton
-              selected={selectedIndex === 9}
-              onClick={(event) => handleListItemClick(event, 9)}
+              selected={selectedIndex === 8}
+              onClick={(event) => handleListItemClick(event, 8)}
             >
               <ListItemIcon>
                 <ReportGmailerrorredIcon />
@@ -143,8 +163,8 @@ const LeftButtonsMenu = () => {
             </ListItemButton>
 
             <ListItemButton
-              selected={selectedIndex === 7}
-              onClick={(event) => handleListItemClick(event, 7)}
+              selected={selectedIndex === 9}
+              onClick={(event) => handleListItemClick(event, 9)}
             >
               <ListItemIcon>
                 <DeleteOutlineIcon />
