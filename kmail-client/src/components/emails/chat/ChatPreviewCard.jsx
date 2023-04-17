@@ -32,17 +32,23 @@ const ChatPreviewCard = ({ user }) => {
     const now = new Date()
     const diff = now.getTime() - date.getTime()
     const oneDay = 24 * 60 * 60 * 1000
-
-    if (diff < oneDay) {
+    const yesterday = new Date(now.getTime() - oneDay)
+    const twoDaysAgo = new Date(now.getTime() - 2 * oneDay)
+  
+    if (diff < oneDay && date.getDate() === now.getDate()) {
       // less than 24 hours ago, return time
       return date.toLocaleString('en-US', {
         hour: 'numeric',
         minute: 'numeric',
         hour12: true,
       })
-    } else if (diff < 7 * oneDay) {
-      // within the last week, return weekday name
-      return date.toLocaleString('en-US', { weekday: 'long' })
+    } else if (diff < 7 * oneDay && date > twoDaysAgo) {
+      // within the last week, return weekday name or "yesterday"
+      if (date.getDate() === yesterday.getDate()) {
+        return 'Yesterday'
+      } else {
+        return date.toLocaleString('en-US', { weekday: 'long' })
+      }
     } else if (now.getFullYear() === date.getFullYear()) {
       // within this year, return date in 'MMM D' format
       return date.toLocaleString('en-US', { month: 'short', day: 'numeric' })
@@ -51,6 +57,8 @@ const ChatPreviewCard = ({ user }) => {
       return date.toLocaleDateString()
     }
   }
+  
+
 
   return (
     <Button onClick={handleClick} fullWidth className="chat-preview-card">

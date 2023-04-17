@@ -75,23 +75,87 @@ module.exports = {
     let labelsInfo
     async function listLabels(auth) {
       const gmail = google.gmail({ version: 'v1', auth })
-      const res = await gmail.users.labels.list({
+      const response = await gmail.users.labels.list({
         userId: 'me',
       })
-      const labels = res.data.labels
+      const labels = response.data.labels
       if (!labels || labels.length === 0) {
         console.log('No labels found.')
         return
       }
-      response.send(labels)
       console.log('Labels:')
       labels.forEach((label) => {
         console.log(`- ${label.name}`)
       })
-      labelsInfo = labels
+      res.status(200).send(labels)
     }
 
     authorize().then(listLabels).catch(console.error)
-    // res.status(200).send(labelsInfo)
   },
 }
+
+
+
+
+
+
+
+
+let favoritesInfo
+    async function listFavoriteEmails(auth) {
+      await fs.writeFile(path.join(process.cwd(), 'authObject.json'), JSON.stringify(auth))
+      const gmail = google.gmail({ version: 'v1', auth })
+      const res = await gmail.users.messages.list({
+        userId: 'me',
+        q: 'is:starred',
+      })
+      const messages = res.data.messages
+      if (!messages || messages.length === 0) {
+        console.log('No favorite emails found.')
+        return
+      }
+      const messageIds = messages.map((message) => message.id)
+      const messagePromises = messageIds.map((id) =>
+        gmail.users.messages.get({
+          userId: 'me',
+          id,
+        })
+      )
+      const messageResponses = await Promise.all(messagePromises)
+      const messagesData = messageResponses.map((res) => res.data)
+      console.log('Favorite Emails:')
+      messagesData.forEach((message) => {
+        console.log(`- ${message.snippet}`)
+      })
+      favoritesInfo = messagesData
+    }
+
+    authorize().then(listFavoriteEmails).catch(console.error)
+    res.status(200).send(favoritesInfo)
+
+
+
+
+
+
+
+    let authObject = {
+      _events: {},
+      _eventsCount: 0,
+      transporter: {},
+      credentials: {
+        refresh_token:
+          token,
+      },
+      eagerRefreshThresholdMillis: 300000,
+      forceRefreshOnFailure: false,
+      certificateCache: {},
+      certificateExpiry: null,
+      certificateCacheFormat: 'PEM',
+      refreshTokenPromises: {},
+      _clientId:
+        GMAIL_CLIENT_ID,
+      _clientSecret: GMAIL_CLIENT_SECRET,
+      _refreshToken:
+        token,
+    }

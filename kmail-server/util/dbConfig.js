@@ -6,6 +6,7 @@ const db = new Sequelize(
    DB_CONNECTION_STR,
    {
       dialect: "postgres",
+      logging: false,
       dialectOptions: {
          ssl: {
             require: true,

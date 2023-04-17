@@ -1,19 +1,10 @@
 //! Imports
-const http = require('http');
 const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
-const path = require('path')
+// const path = require('path')
 const db = require('./util/dbConfig')
-
-const socketio = require('socket.io');
-const server = http.createServer(app);
-const io = socketio(server);
-
-io.on('connection', (socket) => {
-  console.log('A user connected!');
-});
 
 const User = require('./models/users')
 const Contact = require('./models/contacts')
@@ -48,7 +39,8 @@ const {
   getLocalUser,
 } = require('./controllers/authController')
 const { updateDarkMode, getOtherUsers, createChat, getChat, getConversations, getLatestMessage, createMessage, getAllMessages, } = require('./controllers/userController')
-const { getLabels } = require('./emailFetch')
+// const { getLabels, getTestInfo } = require('./emailFetch')
+const { getTestInfo }= require('./controllers/emailApiController')
 
 // Unprotected endpoints
 app.get('/validate/username/:username', checkUsernameAvailability)
@@ -60,7 +52,7 @@ app.put('/accounts/update/picture', updateProfilePic)
 
 // Protected endpoints
 app.get('/accounts/users', validateToken, getUser)
-app.get('/user/emails/get/all', validateToken, getLabels)
+app.get('/user/emails/get/all', getTestInfo) //add back validation
 app.put('/user/update/dark_mode', validateToken, updateDarkMode)
 app.get('/users/search/:string', validateToken, getOtherUsers)
 app.post('/chats/create', validateToken, createChat)
@@ -69,6 +61,25 @@ app.get('/user/conversations/get', validateToken, getConversations)
 app.get('/chat/:id/messages', validateToken, getLatestMessage)
 app.post('/chats/messages/create', validateToken, createMessage)
 app.get('/chat/:id/messages/all', validateToken, getAllMessages)
+
+//! Socket server
+const { WebSocketServer, WebSocket } = require('ws')
+
+const wss = new WebSocketServer({ port: 8085 });
+
+wss.on('connection', function connection(ws) {
+  ws.send('Welcome!')
+  ws.on('error', console.error);
+
+
+  ws.on('message', function message(data, isBinary) {
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(data, { binary: isBinary });
+      }
+    });
+  });
+});
 
 //! Server listen
 const { SERVER_PORT } = process.env
@@ -79,3 +90,5 @@ db.sync()
       console.log(`SERVER RUNNING ON SERVER_PORT ${SERVER_PORT}`)
     )
   })
+
+  // httpServer.listen(8030, () => console.log('listening on port 8030'))

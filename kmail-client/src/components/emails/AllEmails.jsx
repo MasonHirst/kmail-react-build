@@ -10,9 +10,9 @@ const AllEmails = () => {
   return (
     <Paper className='emails-page-div-general'>
       <Routes>
-        <Route path='/' element={<BasicInbox />} />
+        <Route path='/inbox' element={<BasicInbox />} />
         <Route path='chats/*' element={<AllChats />} />
-        <Route path='*' element={<Navigate to="/" />} />
+        <Route path='*' element={<Navigate to="/inbox" />} />
       </Routes>
     </Paper>
   )

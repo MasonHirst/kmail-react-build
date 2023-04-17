@@ -1,0 +1,17 @@
+{
+  "_events": {},
+  "_eventsCount": 0,
+  "transporter": {},
+  "credentials": {
+    "refresh_token": "1//06YmyhRGgveiUCgYIARAAGAYSNwF-L9IrqRhXBwq_6dZmvUrRGBt4fiiXUG5fw4zpc5-lfWrtuob2bV-CZ7A2gSowSKLzvDAWYIc"
+  },
+  "eagerRefreshThresholdMillis": 300000,
+  "forceRefreshOnFailure": false,
+  "certificateCache": {},
+  "certificateExpiry": null,
+  "certificateCacheFormat": "PEM",
+  "refreshTokenPromises": {},
+  "_clientId": "216906597130-r6il65eciv223evvi17h7d2u1u7l3sq1.apps.googleusercontent.com",
+  "_clientSecret": "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",
+  "_refreshToken": "1//06YmyhRGgveiUCgYIARAAGAYSNwF-L9IrqRhXBwq_6dZmvUrRGBt4fiiXUG5fw4zpc5-lfWrtuob2bV-CZ7A2gSowSKLzvDAWYIc"
+}
