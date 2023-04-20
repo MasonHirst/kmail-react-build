@@ -71,7 +71,6 @@ wss.on('connection', function connection(ws) {
   ws.send('Welcome!')
   ws.on('error', console.error);
 
-
   ws.on('message', function message(data, isBinary) {
     wss.clients.forEach(function each(client) {
       if (client.readyState === WebSocket.OPEN) {
@@ -90,5 +89,3 @@ db.sync()
       console.log(`SERVER RUNNING ON SERVER_PORT ${SERVER_PORT}`)
     )
   })
-
-  // httpServer.listen(8030, () => console.log('listening on port 8030'))

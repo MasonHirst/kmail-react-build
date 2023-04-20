@@ -107,7 +107,6 @@ module.exports = {
   },
 
   findProfilePic: async (req, res) => {
-    console.log(req.params.username)
     try {
       let user = await User.findAll({
         where: { username: req.params.username },

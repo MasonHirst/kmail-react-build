@@ -7,6 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { DarkModeProvider, DarkModeContext } from './context/DarkThemeContext'
 import axios from 'axios'
 import { Authentication } from './context/AuthenticationContext'
+import { SocketProvider } from './context/SocketContext'
 
 axios.defaults.baseURL = 'http://localhost:8080/'
 axios.defaults.headers.common['Authorization'] =
@@ -46,7 +47,9 @@ root.render(
           <ThemeProvider theme={context.darkTheme ? darkModeOn : lightModeOn}>
             <CssBaseline />
             <Authentication>
-              <App />
+              <SocketProvider>
+                <App />
+              </SocketProvider>
             </Authentication>
           </ThemeProvider>
         )}

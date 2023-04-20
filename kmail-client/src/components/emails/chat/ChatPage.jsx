@@ -5,6 +5,7 @@ import MessageCard from './MessageCard'
 import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { useParams } from 'react-router-dom'
 import { AuthContext } from '../../../context/AuthenticationContext'
+import { SocketContext } from '../../../context/SocketContext'
 const { Button, Typography, Avatar, IconButton, SendIcon } = muiStyles
 
 const ChatPage = () => {
@@ -13,11 +14,9 @@ const ChatPage = () => {
     setIsLightLoading,
     user,
     setChatId,
-    setUpdateMessages,
-    updateMessages,
-    socket,
   } = useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
+  const { socket } = useContext(SocketContext)
   const { chat_id } = useParams()
   const [otherUser, setOtherUser] = useState({})
   const [messageInput, setMessageInput] = useState('')
@@ -56,7 +55,7 @@ const ChatPage = () => {
         setTimeout(() => {
           setIsLightLoading(false)
         }, 350)
-        console.log('data: ', data)
+        // console.log('data: ', data)
         setMessages(data)
       })
       .catch((err) => {
@@ -65,25 +64,19 @@ const ChatPage = () => {
         }, 350)
         console.error('ERROR IN CHATPAGE MESSAGES: ', err)
       })
-  }, [chat_id, updateMessages])
-
-
-  function handleSubmit() {
-    if (messageInput) {
-      // console.log({inputValue})
-      socket.send(messageInput)
-    } else alert('Message cannot be empty')
-  }
+  }, [chat_id])
 
   socket.addEventListener("message", ({data}) => {
     console.log("Message from server: ", data);
+    setMessages([{
+      sender_id: data.sender_id,
+      text: data.text,
+    }, ...messages])
   });
-
-
 
   function handleSubmit(event) {
     event.preventDefault()
-    // socket.send('hello from kmail client!', messageInput)
+    socket.send(JSON.stringify({text: messageInput, sender_id: user.id}))
 
     setIsLightLoading(true)
     axios
@@ -93,9 +86,7 @@ const ChatPage = () => {
         chat: chat_id,
       })
       .then(({ data }) => {
-        setUpdateMessages(!updateMessages)
         setMessageInput('')
-        setIsLightLoading(false)
         setTimeout(() => {
           inputRef.current.focus()
         }, 300)
@@ -104,10 +95,10 @@ const ChatPage = () => {
       })
       .catch((err) => {
         setTimeout(() => {
-          setIsLightLoading(false)
         }, 350)
         console.error('ERROR IN CHAT PAGE MESSAGESENDER: ', err)
       })
+      .finally(() => setIsLightLoading(false))
   }
 
   let mappedMessages = messages.map((message, index) => {

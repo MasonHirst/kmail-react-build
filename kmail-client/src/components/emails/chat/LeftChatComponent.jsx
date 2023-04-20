@@ -9,7 +9,7 @@ const { Button, IconButton, MoreVertOutlinedIcon, ChatBubbleOutlineOutlinedIcon,
 
 const LeftChatComponent = () => {
   const location = useLocation();
-  const { setChatId, updateMessages, chatId } = useContext(AuthContext)
+  const { setChatId, chatId } = useContext(AuthContext)
   const navigate = useNavigate()
   const { darkTheme } = useContext(DarkModeContext)
   const [conversations, setConversations] = useState([])
@@ -26,7 +26,7 @@ const LeftChatComponent = () => {
       .catch(err => {
         console.error('ERROR IN LEFT CHAT COMPONENT: ', err)
       })
-  }, [updateMessages, chatId])
+  }, [chatId])
   
   return (
     <div className='left-chat-div'>
