@@ -16,7 +16,7 @@ const ChatPage = () => {
     setChatId,
   } = useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
-  const { socket } = useContext(SocketContext)
+  const { message, sendMessage } = useContext(SocketContext)
   const { chat_id } = useParams()
   const [otherUser, setOtherUser] = useState({})
   const [messageInput, setMessageInput] = useState('')
@@ -66,17 +66,19 @@ const ChatPage = () => {
       })
   }, [chat_id])
 
-  socket.addEventListener("message", ({data}) => {
-    console.log("Message from server: ", data);
-    setMessages([{
-      sender_id: data.sender_id,
-      text: data.text,
-    }, ...messages])
-  });
+    useEffect(() => {
+      console.log('Value: ', message)
+      if (!message) return
+      setMessages([{
+        
+        sender_id: message.sender_id,
+        text: message.text,
+      }, ...messages])
+    }, [message])
 
   function handleSubmit(event) {
     event.preventDefault()
-    socket.send(JSON.stringify({text: messageInput, sender_id: user.id}))
+    sendMessage({text: messageInput, recipient_id: otherUser.id})
 
     setIsLightLoading(true)
     axios

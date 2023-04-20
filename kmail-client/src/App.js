@@ -5,6 +5,7 @@ import AllMenus from './components/menus/AllMenus'
 import AllAuth from './components/auth/AllAuth'
 import { AuthContext } from './context/AuthenticationContext'
 import './reset.css'
+import { SocketProvider } from './context/SocketContext'
 
 function App() {
   const { authState } = useContext(AuthContext)
@@ -17,10 +18,12 @@ function App() {
       }}
     >
       {authState === 'AUTHENTICATED' ? (
-        <Routes>
-          <Route path="/*" element={<AllMenus />} />
-          <Route path="*" element={<Navigate to='/' />} />
-        </Routes>
+        <SocketProvider>
+          <Routes>
+            <Route path="/*" element={<AllMenus />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </SocketProvider>
       ) : (
         <Routes>
           <Route path="authenticate/*" element={<AllAuth />} />
