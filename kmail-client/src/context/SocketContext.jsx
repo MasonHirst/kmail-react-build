@@ -1,41 +1,48 @@
-import React, { createContext, useState, useEffect, useCallback, useLocalStorage } from 'react'
+import React, { createContext, useState, useEffect, useCallback, } from 'react'
+
 
 export const SocketContext = createContext()
+
+const send = (socket, event, body) => {
+    socket?.send(JSON.stringify({ event, body }))
+}
 
 export const SocketProvider = ({ children }) => {
   const [message, setMessage] = useState('')
   const [socket, setSocket] = useState()
-  const [token] = useLocalStorage('jwtAccessToken')
-  console.log({token});
-
-  const send = useCallback((event, body) => {
-    socket?.send(JSON.stringify({ event, body }))
-  }, [socket])
-
+  
+  // const send = useCallback(
+  // }, [socket])
+  
   useEffect(() => {
-    if (!token) return
     const ws = new WebSocket('ws://localhost:8085')
-    ws.addEventListener('open', function (event) {
-      send('authorize', {
+    const token = localStorage.getItem('jwtAccessToken')
+    ws.addEventListener('open', function () {
+      console.log({token});
+      send(ws, 'authorize', {
         authorization: token,
       })
     })
-    setSocket(ws)
-  }, [token])
 
-  useEffect(() => {
-    if (!socket) return
-    socket.addEventListener('message', function (event) {
+    ws.addEventListener('message', function (event) {
       console.log('inside of listener: ', event.data)
       if (!event?.data) return
       let message = JSON.parse(event.data)
       setMessage(message)
     })
-  }, [socket])
+    
+    setSocket(ws)
+  }, [])
+
+  // useEffect(() => {
+  //   if (!socket) return
+    
+  // }, [socket])
 
   const sendMessage = useCallback((body) => {
-    send('chatMessage', body)
-  }, [])
+    console.log(!!socket)
+    send(socket, 'chatMessage', body)
+  }, [socket])
 
   return (
     <SocketContext.Provider value={{ message, sendMessage }}>

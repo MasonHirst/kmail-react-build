@@ -37,10 +37,20 @@ const {
   updateProfilePic,
   verifyLogin,
   getLocalUser,
+  verifyAccessToken,
 } = require('./controllers/authController')
-const { updateDarkMode, getOtherUsers, createChat, getChat, getConversations, getLatestMessage, createMessage, getAllMessages, } = require('./controllers/userController')
+const {
+  updateDarkMode,
+  getOtherUsers,
+  createChat,
+  getChat,
+  getConversations,
+  getLatestMessage,
+  createMessage,
+  getAllMessages,
+} = require('./controllers/userController')
 // const { getLabels, getTestInfo } = require('./emailFetch')
-const { getTestInfo }= require('./controllers/emailApiController')
+const { getTestInfo } = require('./controllers/emailApiController')
 
 // Unprotected endpoints
 app.get('/validate/username/:username', checkUsernameAvailability)
@@ -64,21 +74,47 @@ app.get('/chat/:id/messages/all', validateToken, getAllMessages)
 
 //! Socket server
 const { WebSocketServer, WebSocket } = require('ws')
+const wss = new WebSocketServer({ port: 8085 })
 
-const wss = new WebSocketServer({ port: 8085 });
+const connections = {}
 
-wss.on('connection', function connection(ws) {
-  ws.send('Welcome!')
-  ws.on('error', console.error);
-
-  ws.on('message', function message(data, isBinary) {
-    wss.clients.forEach(function each(client) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(data, { binary: isBinary });
+wss.on('connection', function connection(ws, req) {
+  try {
+    // console.log('connection happened')
+    ws.on('error', console.error)
+    ws.on('message', async function message(data, isBinary) {
+      const { event, body } = JSON.parse(data)
+      if (event === 'authorize') {
+        // validate jwt
+        // associate userId to client
+        // add to list of clients
+        if (!body.authorization) return console.log('no authorization')
+        const claims = await verifyAccessToken(body.authorization)
+        ws.userId = claims.sub
+        connections[claims.sub] = ws
+        console.log('authorize happened', claims.sub)
+      } else if (event === 'chatMessage') {
+        // pull recipient id from parsedData.body
+        // get client by userId
+        // send message to that one client
+        const { text, recipient_id } = body
+        const newBody = JSON.stringify({ sender_id: ws.userId, text })
+        console.log('chat Message: ', ws.userId)
+        if (!recipient_id) return console.log('recipient_id is required')
+        const client = connections[recipient_id]
+        if (!client) return console.log('other person not online')
+        client.send(newBody, { binary: isBinary })
       }
-    });
-  });
-});
+    })
+
+    ws.on('close', function (event) {
+      console.log('CLOSE EVENT: ', ws.userId)
+      delete connections[ws.userId]
+    })
+  } catch (err) {
+    console.error(err)
+  }
+})
 
 //! Server listen
 const { SERVER_PORT } = process.env

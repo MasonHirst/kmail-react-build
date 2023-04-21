@@ -7,11 +7,18 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { DarkModeProvider, DarkModeContext } from './context/DarkThemeContext'
 import axios from 'axios'
 import { Authentication } from './context/AuthenticationContext'
-import { SocketProvider } from './context/SocketContext'
 
 axios.defaults.baseURL = 'http://localhost:8080/'
-axios.defaults.headers.common['Authorization'] =
-  localStorage.getItem('jwtAccessToken')
+// axios.defaults.headers.common['Authorization'] =
+//   localStorage.getItem('jwtAccessToken')
+
+axios.interceptors.request.use(
+  function (config) {
+    config.headers.Authorization = localStorage.getItem('jwtAccessToken')
+    // Do something before request is sent
+    return config
+  },
+)
 
 const darkModeOn = createTheme({
   palette: {
@@ -47,9 +54,7 @@ root.render(
           <ThemeProvider theme={context.darkTheme ? darkModeOn : lightModeOn}>
             <CssBaseline />
             <Authentication>
-              <SocketProvider>
                 <App />
-              </SocketProvider>
             </Authentication>
           </ThemeProvider>
         )}

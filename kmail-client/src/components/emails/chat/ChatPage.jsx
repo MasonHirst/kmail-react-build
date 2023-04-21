@@ -78,11 +78,16 @@ const ChatPage = () => {
 
   function handleSubmit(event) {
     event.preventDefault()
+    setMessages([{
+      sender_id: user.id,
+      text: messageInput,
+    }, ...messages])
     sendMessage({text: messageInput, recipient_id: otherUser.id})
 
     setIsLightLoading(true)
     axios
       .post('chats/messages/create', {
+
         text: messageInput,
         recipient: otherUser.id,
         chat: chat_id,
