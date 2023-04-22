@@ -19,13 +19,6 @@ export function Authentication({ children }) {
   const [accessToken, setAccessToken] = useState()
   const [authState, setAuthState] = useState(LOADING)
 
-  // const socket = new WebSocket('ws://localhost:8085')
-  // useEffect(() => {
-  //   socket.addEventListener('open', function (event) {
-  //     console.log('connected to ws server ')
-  //   })
-  // })
-
   function logout() {
     localStorage.removeItem(tokenKey)
     setAccessToken(undefined)

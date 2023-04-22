@@ -34,11 +34,6 @@ export const SocketProvider = ({ children }) => {
     setSocket(ws)
   }, [])
 
-  // useEffect(() => {
-  //   if (!socket) return
-    
-  // }, [socket])
-
   const sendMessage = useCallback((body) => {
     console.log(!!socket)
     send(socket, 'chatMessage', body)
