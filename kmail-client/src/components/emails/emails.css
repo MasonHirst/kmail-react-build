@@ -6,6 +6,12 @@
   margin-left: 10px;
   opacity: .8;
 }
+.date-marker-container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
 
 .chat-preview-card {
   padding: 15px !important;
@@ -25,6 +31,7 @@
   width: 100%;
   display: flex;
   align-items: flex-start;
+
 }
 
 .left-chat-div {
@@ -39,10 +46,10 @@
   align-items: center;
   justify-content: space-between;
   padding-left: 20px;
+
 }
 .left-chat-chatlist {
   height: calc(100% - 165px);
-
   border-bottom-left-radius: 20px;
   overflow-y: auto;
 }
@@ -113,6 +120,49 @@
   overflow-y: auto;
   padding: 25px;
   gap: 10px;
+  margin-right: 4px;
+  position: relative;
+}
+.chat-conversation-container::-webkit-scrollbar {
+  width: 12px;
+}
+.chat-conversation-container::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 5px;
+}
+.chat-conversation-container::-webkit-scrollbar-thumb {
+  background-color: rgba(128, 112, 112, 0.6);
+  border-radius: 6px;
+}
+
+.message-details-text {
+  font-size: 14px !important;
+  opacity: .6 !important;
+  color: white;
+  margin-top: -6px !important;
+}
+.details-left {
+  margin-left: 60px !important;
+}
+.details-right {
+  margin-right: 7px !important;
+}
+
+.message-bubble-container {
+  position: relative !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bubble-container-right {
+  flex-direction: row-reverse;
+}
+.bubble-container-left {
+  flex-direction: row;
+}
+
+.message-options-btn {
+  display: none !important;
 }
 
 .message-bubble-btn {
@@ -121,23 +171,30 @@
   color: inherit !important;
   background-color: transparent !important;
   display: flex !important;
-  align-items: self-end;
+  flex-direction: column;
   gap: 8px;
 }
 .message-left {
-  justify-content: flex-start !important;
+  border: 1px solid white !important;
+  align-items: flex-start !important;
+}
+.message-left:hover .message-options-btn {
+  display: block !important;
 }
 .message-right {
-  justify-content: flex-end !important;
+  align-items: flex-end !important;
+}
+.message-right:hover .message-options-btn {
+  display: block !important
 }
 .message-bubble {
   padding: 12px;
   border-radius: 27px;
-  max-width: 70%;
   text-align: left;
 }
 .message-bubble-left {
   background-color: #303030;
+  color: white;
 }
 .message-bubble-right {
   background-color: #7BACF8;

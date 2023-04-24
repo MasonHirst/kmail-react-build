@@ -39,7 +39,7 @@ const FinishProfile = () => {
     axios
       .put('/accounts/update/picture', { accessToken, chosenPic })
       .then(({ data }) => {
-        console.log({ data })
+        // console.log({ data })
         if (typeof data === 'object') {
           localStorage.setItem('jwtAccessToken', accessToken)
           window.location.reload()
@@ -50,7 +50,7 @@ const FinishProfile = () => {
         }
       })
       .catch((err) => {
-        console.log('ERROR IN FINISH PROFILE: ', err)
+        console.error('ERROR IN FINISH PROFILE: ', err)
       })
   }
 

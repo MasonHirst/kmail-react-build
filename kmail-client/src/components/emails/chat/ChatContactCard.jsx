@@ -16,7 +16,7 @@ const ChatContactCard = ({ user }) => {
         setTimeout(() => {
           setIsLightLoading(false)
         }, 350);
-        console.log(data.id)
+        // console.log(data.id)
         setChatId(data.id)
         navigate(`/chats/${data.id}`)
       })

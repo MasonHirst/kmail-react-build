@@ -6,7 +6,7 @@ import muiStyles from '../../../styles/muiStyles'
 const { IconButton, Avatar, Typography, Button } = muiStyles
 
 const ChatPreviewCard = ({ user }) => {
-  const { chatId, setUpdateMessages, updateMessages } = useContext(AuthContext)
+  const { chatId, } = useContext(AuthContext)
   const navigate = useNavigate()
   const [message, setMessage] = useState([])
   useEffect(() => {
@@ -19,7 +19,7 @@ const ChatPreviewCard = ({ user }) => {
       .catch((err) => {
         console.error('ERROR IN CHAT PREVIEW CARD: ', err)
       })
-  }, [updateMessages, chatId])
+  }, [chatId])
 
   function handleClick() {
     if (user.chat.id !== chatId) {
@@ -58,8 +58,6 @@ const ChatPreviewCard = ({ user }) => {
     }
   }
   
-
-
   return (
     <Button onClick={handleClick} fullWidth className="chat-preview-card">
       <Avatar

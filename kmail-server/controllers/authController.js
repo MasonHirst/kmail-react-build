@@ -21,23 +21,18 @@ function signAccessToken(claims) {
 
 function verifyAccessToken(token) {
   return new Promise((resolve, reject) => {
+    if (!token) throw new Error('token is required')
     jwt.verify(token, JWT_SIGNING_SECRET, (error, data) => {
       if (error) reject(error)
       else resolve(data)
     })
   })
 }
+ 
 
 module.exports = {
+  verifyAccessToken,
   validateToken: async (req, res, next) => {
-    function verifyAccessToken(token) {
-      return new Promise((resolve, reject) => {
-        jwt.verify(token, JWT_SIGNING_SECRET, (error, data) => {
-          if (error) reject(error)
-          else resolve(data)
-        })
-      })
-    }
     try {
       const accessToken = req.headers.authorization
       const { sub } = await verifyAccessToken(accessToken)
@@ -107,7 +102,6 @@ module.exports = {
   },
 
   findProfilePic: async (req, res) => {
-    console.log(req.params.username)
     try {
       let user = await User.findAll({
         where: { username: req.params.username },

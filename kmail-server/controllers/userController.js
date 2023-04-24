@@ -75,7 +75,7 @@ module.exports = {
   },
 
   getChat: async (req, res) => {
-    const { id } = req.params
+    const { id, offset } = req.params
     try {
       const chat = await Chat.findOne({ where: { id } })
       const user1 = await User.findOne({ where: { id: chat.user1 } })
@@ -158,9 +158,14 @@ module.exports = {
   },
 
   getAllMessages: async (req, res) => {
-    const { id } = req.params
+    const { id, offset, limit } = req.params
     try {
-      const messages = await Message.findAll({ where: { chat_id: id }, order: [['updatedAt', 'DESC']], })
+      const messages = await Message.findAll({
+        where: { chat_id: id },
+        order: [['updatedAt', 'DESC']],
+        limit: limit, // load only 'limit' number of messages
+        offset: (offset) * limit,
+      })
       res.send(messages)
     } catch (err) {
       console.log(err)

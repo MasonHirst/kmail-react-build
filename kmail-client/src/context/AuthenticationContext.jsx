@@ -18,14 +18,6 @@ export function Authentication({ children }) {
   const [isLightLoading, setIsLightLoading] = useState(false)
   const [accessToken, setAccessToken] = useState()
   const [authState, setAuthState] = useState(LOADING)
-  const [updateMessages, setUpdateMessages] = useState(false)
-
-  const socket = new WebSocket('ws://localhost:8085')
-  // useEffect(() => {
-    socket.addEventListener('open', function (event) {
-      console.log('connected to ws server ')
-    })
-  // })
 
   function logout() {
     localStorage.removeItem(tokenKey)
@@ -75,7 +67,7 @@ export function Authentication({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, updateMessages, setUpdateMessages, chatId, socket, setChatId, authState, setUser, logout, children, accessToken, isLightLoading, setIsLightLoading, setAccessToken, isDeepLoading, setIsDeepLoading }}>
+    <AuthContext.Provider value={{ user, chatId, setChatId, authState, setUser, logout, children, accessToken, isLightLoading, setIsLightLoading, setAccessToken, isDeepLoading, setIsDeepLoading }}>
       {/* {authState !== AUTHENTICATED ? (children) : (
         <Routes>
           <Route path='authenticate' element={<AllAuth />} />
