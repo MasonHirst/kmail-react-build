@@ -70,7 +70,7 @@ app.get('/chats/get/:id', validateToken, getChat)
 app.get('/user/conversations/get', validateToken, getConversations)
 app.get('/chat/:id/messages', validateToken, getLatestMessage)
 app.post('/chats/messages/create', validateToken, createMessage)
-app.get('/chat/:id/messages/all', validateToken, getAllMessages)
+app.get('/chat/:id/messages/:offset/:limit', validateToken, getAllMessages)
 
 //! Socket server
 const { WebSocketServer, WebSocket } = require('ws')

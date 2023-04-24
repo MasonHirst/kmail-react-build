@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { SocketContext } from '../../../context/SocketContext'
 import { AuthContext } from '../../../context/AuthenticationContext'
 import axios from 'axios'
 import ChatPreviewCard from './ChatPreviewCard'
@@ -12,12 +13,15 @@ const LeftChatComponent = () => {
   const { setChatId, chatId } = useContext(AuthContext)
   const navigate = useNavigate()
   const { darkTheme } = useContext(DarkModeContext)
+  const { message } = useContext(SocketContext)
   const [conversations, setConversations] = useState([])
+  
   const mappedConversations = conversations.map((conv, index) => {
     return <ChatPreviewCard key={index} user={conv} />
   })
 
   useEffect(() => {
+    // console.log('yup');
     axios.get('user/conversations/get')
       .then(({data}) => {
         // console.log('conversations: ', data)
@@ -26,7 +30,7 @@ const LeftChatComponent = () => {
       .catch(err => {
         console.error('ERROR IN LEFT CHAT COMPONENT: ', err)
       })
-  }, [chatId])
+  }, [chatId, message])
   
   return (
     <div className='left-chat-div'>

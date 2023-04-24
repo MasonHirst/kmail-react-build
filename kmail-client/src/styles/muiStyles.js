@@ -58,8 +58,10 @@ import MarkUnreadChatAltOutlinedIcon from '@mui/icons-material/MarkUnreadChatAlt
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 let muiStyles = {
+  MoreVertIcon,
   ArrowBackOutlinedIcon,
   MoreVertOutlinedIcon,
   ChatBubbleOutlineOutlinedIcon,

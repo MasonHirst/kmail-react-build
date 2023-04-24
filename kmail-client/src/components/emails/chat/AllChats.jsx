@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React from 'react'
 import LeftChatComponent from './LeftChatComponent'
 import RightChatComponent from './RightChatComponent'
 import { AuthContext } from '../../../context/AuthenticationContext'
@@ -7,8 +7,6 @@ import muiStyles from '../../../styles/muiStyles'
 const {} = muiStyles
 
 const AllChats = () => {
-
-
   return (
     <div className="chats-general-div">
       <LeftChatComponent />

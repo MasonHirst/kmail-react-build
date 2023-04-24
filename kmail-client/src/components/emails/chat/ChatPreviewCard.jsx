@@ -58,8 +58,6 @@ const ChatPreviewCard = ({ user }) => {
     }
   }
   
-
-
   return (
     <Button onClick={handleClick} fullWidth className="chat-preview-card">
       <Avatar

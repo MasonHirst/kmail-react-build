@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback, } from 'react'
-
+import notificationSound from '../assets/positive-tone.mp3'
 
 export const SocketContext = createContext()
 
@@ -11,31 +11,33 @@ export const SocketProvider = ({ children }) => {
   const [message, setMessage] = useState('')
   const [socket, setSocket] = useState()
   
-  // const send = useCallback(
-  // }, [socket])
-  
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:8085')
     const token = localStorage.getItem('jwtAccessToken')
     ws.addEventListener('open', function () {
-      console.log({token});
       send(ws, 'authorize', {
         authorization: token,
       })
     })
 
     ws.addEventListener('message', function (event) {
-      console.log('inside of listener: ', event.data)
       if (!event?.data) return
-      let message = JSON.parse(event.data)
-      setMessage(message)
+      let messageData = JSON.parse(event.data)
+      setMessage(messageData)
     })
     
     setSocket(ws)
   }, [])
 
+  useEffect(() => {
+    if (!message) return
+    const sound = new Audio(notificationSound)
+    sound.volume = .3
+    sound.play()
+  }, [message])
+
   const sendMessage = useCallback((body) => {
-    console.log(!!socket)
+    // console.log(!!socket)
     send(socket, 'chatMessage', body)
   }, [socket])
 
