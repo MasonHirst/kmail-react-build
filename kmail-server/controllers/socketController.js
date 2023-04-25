@@ -4,18 +4,28 @@ const { verifyAccessToken } = require('./authController')
 
 const connections = {}
 function sendMessageToClient(recipientId, message) {
-  const client = connections[recipientId]
-  if (!client) {
-    console.log(`client ${recipientId} person not online`)
-    return
+  if (Array.isArray(recipientId)) {
+    for (let i = 0; i < recipientId.length; i++) {
+      const client = connections[recipientId[i]]
+      if (!client) {
+        console.log(`client ${recipientId[i]} person not online`)
+        return
+      }
+      client.send(message)
+    }
+  } else {
+    const client = connections[recipientId]
+    if (!client) {
+      console.log(`client ${recipientId} person not online`)
+      return
+    }
+    client.send(message)
   }
-  client.send(message)
 }
 
 module.exports = {
   sendMessageToClient,
   startSocketServer: async () => {
-
     wss.on('connection', function connection(ws, req) {
       try {
         // console.log('connection happened')
