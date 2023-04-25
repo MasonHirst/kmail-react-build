@@ -152,12 +152,13 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
               anchorEl={anchorEl}
               open={open}
               onClose={handleClose}
+              elevation={2}
             >
               {message.sender_id === user.id && (
                 <MenuItem
                   onClick={() => {
                     handleClose()
-                    handleEditMessage(message.id)
+                    handleEditMessage(message)
                   }}
                 >
                   Edit

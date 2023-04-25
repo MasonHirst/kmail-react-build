@@ -1,4 +1,5 @@
 const User = require('../models/users')
+const { sendMessageToClient } = require('./socketController')
 const Message = require('../models/messages')
 const Chat = require('../models/chats')
 require('dotenv').config()
@@ -162,7 +163,7 @@ module.exports = {
     try {
       const messages = await Message.findAll({
         where: { chat_id: id },
-        order: [['updatedAt', 'DESC']],
+        order: [['createdAt', 'DESC']],
         limit: limit, // load only 'limit' number of messages
         offset: offset * limit,
       })
@@ -205,6 +206,7 @@ module.exports = {
           { text, edited: true },
           { where: { id: messageId } }
         )
+        sendMessageToClient(editorId, {event_type: 'updatedMessaged', messageId, text})
         return res.send(updatedText)
       } else if (event === 'newReaction') {
         res.send('function needs finishing')

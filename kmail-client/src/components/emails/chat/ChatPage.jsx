@@ -35,9 +35,8 @@ const ChatPage = () => {
   }
   
   function handleEditMessage(target) {
-    const found = messages.find((item) => item.id === target)
-    setMessageInput(found.text)
-    setMessageToEdit(found.id)
+    setMessageInput(target.text)
+    setMessageToEdit(target.id)
     focusInput()
   }
 
