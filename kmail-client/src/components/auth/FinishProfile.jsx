@@ -39,7 +39,6 @@ const FinishProfile = () => {
     axios
       .put('/accounts/update/picture', { accessToken, chosenPic })
       .then(({ data }) => {
-        // console.log({ data })
         if (typeof data === 'object') {
           localStorage.setItem('jwtAccessToken', accessToken)
           window.location.reload()

@@ -34,7 +34,6 @@ export function Authentication({ children }) {
         if (token) {
           setAccessToken(token)
           const data = await axios.get(`/accounts/users`)
-          // console.log('res: ', data.data)
           setUser(data.data)
         } else {
           setTimeout(() => {
@@ -58,7 +57,6 @@ export function Authentication({ children }) {
     }
   }, [user, accessToken])
 
-  // console.log({authState})
 
   if (authState === LOADING) {
     return (

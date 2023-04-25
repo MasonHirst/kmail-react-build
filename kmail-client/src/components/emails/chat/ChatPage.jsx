@@ -70,7 +70,6 @@ const ChatPage = () => {
     if (messagesEnd) return
     if (div.scrollTop === div.clientHeight - div.scrollHeight) {
       setPageOffset(pageOffset + 1)
-      console.log('paginating', pageOffset)
     }
   }
 
@@ -117,7 +116,6 @@ const ChatPage = () => {
             setMessages([...messages, ...data])
           }
         }, 350)
-        // console.log('data: ', data)
       })
       .catch((err) => {
         setTimeout(() => {
@@ -128,7 +126,6 @@ const ChatPage = () => {
   }, [chat_id, pageOffset])
 
   useEffect(() => {
-    // console.log('Value: ', message)
     if (!message || message.sender_id !== otherUser.id) return
     setMessages([message, ...messages])
   }, [message])
@@ -146,7 +143,7 @@ const ChatPage = () => {
         text: messageInput,
       })
       .then(({ data }) => {
-        console.log('response: ', data)
+
       })
       .catch(console.error)
   }
@@ -200,7 +197,6 @@ const ChatPage = () => {
         prevMessage &&
         !isSameDay(currentMessage.createdAt, prevMessage.createdAt)
       ) {
-        // console.log(currentMessage)
         markedMessages.push({
           sender_id: 'date marker',
           createdAt: currentMessage.createdAt,
@@ -267,7 +263,7 @@ const ChatPage = () => {
             }}
           />
         )}
-        {messagesEnd && (
+        {messagesEnd && !isLightLoading && (
           <div
             style={{
               width: '100%',

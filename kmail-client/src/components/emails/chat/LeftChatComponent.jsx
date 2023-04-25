@@ -21,15 +21,19 @@ const LeftChatComponent = () => {
   })
 
   useEffect(() => {
-    // console.log('yup');
+
     axios.get('user/conversations/get')
       .then(({data}) => {
-        // console.log('conversations: ', data)
+        console.log(data)
         setConversations(data)
       })
       .catch(err => {
         console.error('ERROR IN LEFT CHAT COMPONENT: ', err)
       })
+
+      return () => {
+        setChatId('')
+      }
   }, [chatId, message])
   
   return (

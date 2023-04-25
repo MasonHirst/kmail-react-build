@@ -184,6 +184,9 @@ module.exports = {
         sender_id: userId,
         recipient_id: recipient,
         chat_id: chat,
+        recipient_read: false,
+        sender_deleted: false,
+        recipient_deleted: false,
       })
       if (message) {
         let updateChat = await Chat.update(
@@ -206,7 +209,12 @@ module.exports = {
           { text, edited: true },
           { where: { id: messageId } }
         )
-        const body = JSON.stringify({event_type: 'updatedMessage', messageId, text, id: messageId})
+        const body = JSON.stringify({
+          event_type: 'updatedMessage',
+          messageId,
+          text,
+          id: messageId,
+        })
         sendMessageToClient([editorId, recipient_id], body)
         return res.send(updatedText)
       } else if (event === 'newReaction') {

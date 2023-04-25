@@ -22,7 +22,6 @@ export const SocketProvider = ({ children }) => {
     })
 
     ws.addEventListener('message', function (event) {
-      // console.log(JSON.parse(event.data));
       if (!event?.data) return
       let messageData = JSON.parse(event.data)
       if (messageData.event_type === 'newMessage') {
@@ -43,7 +42,6 @@ export const SocketProvider = ({ children }) => {
   }, [message])
 
   const sendMessage = useCallback((body) => {
-    // console.log(!!socket)
     send(socket, 'chatMessage', body)
   }, [socket])
 

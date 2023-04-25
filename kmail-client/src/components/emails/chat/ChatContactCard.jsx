@@ -9,21 +9,22 @@ const ChatContactCard = ({ user }) => {
   const { isLightLoading, setIsLightLoading, setChatId } = useContext(AuthContext)
   const navigate = useNavigate()
 
+  function stopLoading() {
+    setTimeout(() => {
+      setIsLightLoading(false)
+    }, 350)
+  }
+
   function handleClick() {
     setIsLightLoading(true)
     axios.post('chats/create', {recipient: user.id})
       .then(({data}) => {
-        setTimeout(() => {
-          setIsLightLoading(false)
-        }, 350);
-        // console.log(data.id)
+        stopLoading()
         setChatId(data.id)
         navigate(`/chats/${data.id}`)
       })
       .catch(err => {
-        setTimeout(() => {
-          setIsLightLoading(false)
-        }, 350);
+        stopLoading()
         console.error('ERROR IN CHAT CONTACT CARD:', err)
       })
   }

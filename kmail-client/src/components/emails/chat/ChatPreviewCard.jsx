@@ -6,14 +6,14 @@ import muiStyles from '../../../styles/muiStyles'
 const { IconButton, Avatar, Typography, Button } = muiStyles
 
 const ChatPreviewCard = ({ user }) => {
-  const { chatId, } = useContext(AuthContext)
+  const { chatId } = useContext(AuthContext)
   const navigate = useNavigate()
   const [message, setMessage] = useState([])
+
   useEffect(() => {
     axios
       .get(`chat/${user.chat.id}/messages`)
       .then(({ data }) => {
-        // console.log('response: ', data)
         setMessage(data)
       })
       .catch((err) => {

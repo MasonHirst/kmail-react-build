@@ -9,7 +9,7 @@ const Message = db.define('message', {
     allowNull: false,
   },
   text: {
-    type: DataTypes.STRING({ length: 1000 })
+    type: DataTypes.STRING({ length: 1000 }),
   },
   edited: {
     type: DataTypes.BOOLEAN,
@@ -18,6 +18,9 @@ const Message = db.define('message', {
   reaction: {
     type: DataTypes.JSON,
   },
+  recipient_read: { type: DataTypes.BOOLEAN, },
+  sender_deleted: { type: DataTypes.BOOLEAN, },
+  recipient_deleted: { type: DataTypes.BOOLEAN, },
 })
 
 module.exports = Message

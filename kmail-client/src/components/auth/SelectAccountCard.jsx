@@ -15,7 +15,6 @@ const SelectAccountCard = ({ userId }) => {
     axios
       .get(`accounts/local/${userId}`)
       .then(({ data }) => {
-        // console.log('this is the card response data: ', data)
         setUser(data)
       })
       .catch((err) => {
