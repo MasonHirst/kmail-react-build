@@ -27,7 +27,6 @@ const NewChatPage = () => {
             setIsLightLoading(false)
           }, 350)
           setOtherUsers(data)
-          console.log('data: ', data)
           if (data.length < 1) setSearchMessage('No results')
         })
         .catch(err => {

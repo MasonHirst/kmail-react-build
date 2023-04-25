@@ -21,6 +21,7 @@ export const SocketProvider = ({ children }) => {
     })
 
     ws.addEventListener('message', function (event) {
+      // console.log(JSON.parse(event.data));
       if (!event?.data) return
       let messageData = JSON.parse(event.data)
       setMessage(messageData)

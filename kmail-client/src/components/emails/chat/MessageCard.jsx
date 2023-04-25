@@ -1,15 +1,31 @@
 import React, { useContext, useState } from 'react'
 import muiStyles from '../../../styles/muiStyles'
+import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { AuthContext } from '../../../context/AuthenticationContext'
-const { Button, Typography, Avatar, IconButton, MoreVertIcon } = muiStyles
+const { Button, Typography, Avatar, IconButton, MoreVertIcon, MenuItem, Menu } =
+  muiStyles
 
-const MessageCard = ({ message, otherUser }) => {
+const MessageCard = ({ message, otherUser, handleEditMessage }) => {
+  const { darkTheme } = useContext(DarkModeContext)
   const [showDetails, setShowDetails] = useState(false)
   const { user } = useContext(AuthContext)
   const [showOptions, setShowOptions] = useState(false)
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const open = Boolean(anchorEl)
 
   function handleClick() {
     setShowDetails(!showDetails)
+  }
+
+  function handleMoreOptions(event) {
+    event.stopPropagation()
+    // setShowOptions(!showOptions)
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = (event) => {
+    event.stopPropagation()
+    setAnchorEl(null)
   }
 
   function formatTime(time) {
@@ -82,29 +98,81 @@ const MessageCard = ({ message, otherUser }) => {
             : 'message-bubble-btn message-right'
           : 'date-marker-container'
       }
-      style={{ border: '1px solid red' }}
     >
       {message.sender_id !== 'date marker' ? (
-        <div className={message.sender_id !== user.id ? "message-bubble-container bubble-container-left" : 'message-bubble-container bubble-container-right'}>
-          {message.sender_id !== user.id && (
-            <Avatar
-              sx={{ width: 46, height: 46, color: 'white' }}
-              alt={otherUser.username}
-              src={otherUser.profile_pic}
-            />
-          )}
+        <div
+          className={
+            message.sender_id !== user.id
+              ? 'message-bubble-container bubble-container-left'
+              : 'message-bubble-container bubble-container-right'
+          }
+        >
           <div
-            className={
-              message.sender_id !== user.id
-                ? 'message-bubble message-bubble-left'
-                : 'message-bubble message-bubble-right'
-            }
+            style={{
+              display: 'flex',
+              gap: '3px',
+              alignItems: 'center',
+              flexDirection:
+                message.sender_id !== user.id ? 'row' : 'row-reverse',
+            }}
           >
-            <Typography>{message.text}</Typography>
+            {message.sender_id !== user.id && (
+              <Avatar
+                sx={{
+                  width: 46,
+                  height: 46,
+                  color: 'white',
+                  marginRight: '5px',
+                }}
+                alt={otherUser.username}
+                src={otherUser.profile_pic}
+              />
+            )}
+            <div
+              className={
+                message.sender_id !== user.id
+                  ? 'message-bubble message-bubble-left'
+                  : 'message-bubble message-bubble-right'
+              }
+            >
+              <Typography>{message.text}</Typography>
+            </div>
+            <IconButton
+              onClick={handleMoreOptions}
+              className="message-options-btn"
+              sx={{
+                padding: 'white',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '40px',
+                width: '40px',
+              }}
+            >
+              <MoreVertIcon width={30} />
+            </IconButton>
+
+            <Menu
+              id="basic-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+            >
+              {message.sender_id === user.id && (
+                <MenuItem
+                  onClick={() => {
+                    handleEditMessage(message.id)
+                    handleClose()
+                  }}
+                >
+                  Edit
+                </MenuItem>
+              )}
+
+              <MenuItem onClick={handleClose}>React</MenuItem>
+              <MenuItem onClick={handleClose}>Delete</MenuItem>
+            </Menu>
           </div>
-          <IconButton className='message-options-btn' sx={{ padding: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <MoreVertIcon width={30} />
-          </IconButton>
           {showDetails ? (
             <Typography
               variant="subtitle1"
@@ -113,8 +181,9 @@ const MessageCard = ({ message, otherUser }) => {
                   ? 'message-details-text details-left'
                   : 'message-details-text details-right'
               }
+              // color={darkTheme ? 'white' : 'black'}
             >
-              {formatDate(message.createdAt)}
+              {formatTime(message.createdAt)}
             </Typography>
           ) : (
             ''

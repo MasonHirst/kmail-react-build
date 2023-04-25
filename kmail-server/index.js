@@ -97,8 +97,10 @@ wss.on('connection', function connection(ws, req) {
         // pull recipient id from parsedData.body
         // get client by userId
         // send message to that one client
-        const { text, recipient_id } = body
-        const newBody = JSON.stringify({ sender_id: ws.userId, text })
+        const { text, recipient_id, createdAt } = body
+        console.log(createdAt)
+        const newBody = JSON.stringify({ sender_id: ws.userId, text, createdAt })
+        console.log({newBody})
         console.log('chat Message: ', ws.userId)
         if (!recipient_id) return console.log('recipient_id is required')
         const client = connections[recipient_id]
