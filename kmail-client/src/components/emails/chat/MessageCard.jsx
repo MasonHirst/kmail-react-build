@@ -9,7 +9,6 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
   const { darkTheme } = useContext(DarkModeContext)
   const [showDetails, setShowDetails] = useState(false)
   const { user } = useContext(AuthContext)
-  const [showOptions, setShowOptions] = useState(false)
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
 
@@ -18,13 +17,10 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
   }
 
   function handleMoreOptions(event) {
-    event.stopPropagation()
-    // setShowOptions(!showOptions)
     setAnchorEl(event.currentTarget)
   }
 
   const handleClose = (event) => {
-    event.stopPropagation()
     setAnchorEl(null)
   }
 
@@ -41,53 +37,52 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
   }
 
   function formatDate(val) {
-    const date = new Date(val)
-    const now = new Date()
-    const diffTime = Math.abs(now - date)
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    const year = now.getFullYear()
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ]
-    const dayNames = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ]
-
-    if (diffDays === 0) {
-      const hours = date.getHours()
-      const minutes = date.getMinutes()
-      const ampm = hours >= 12 ? 'PM' : 'AM'
-      const formattedHours = hours % 12 || 12
-      const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes
-      return `today at ${formattedHours}:${formattedMinutes}${ampm}`
-    } else if (diffDays <= 7) {
-      return dayNames[date.getDay()]
-    } else if (date.getFullYear() === year) {
-      return `${monthNames[date.getMonth()]} ${date.getDate()}`
-    } else {
-      return `${
-        monthNames[date.getMonth()]
-      } ${date.getDate()}, ${date.getFullYear()}`
+    const date = new Date(val);
+    const now = new Date();
+  
+    // Check if date is today
+    if (
+      date.getDate() === now.getDate() &&
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear()
+    ) {
+      return "Today";
     }
+  
+    // Check if date is yesterday
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    ) {
+      return "Yesterday";
+    }
+  
+    // Check if date is in the same year
+    if (date.getFullYear() === now.getFullYear()) {
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ]
+      return `${monthNames[date.getMonth()]} ${date.getDate()}`
+    }
+  
+    // Date is not in the same year
+    return `${date.toLocaleString("default", { month: "long" })} ${date.getDate()}, ${date.getFullYear()}`
   }
-
+  
   return (
     <div
       onClick={handleClick}
@@ -161,8 +156,8 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
               {message.sender_id === user.id && (
                 <MenuItem
                   onClick={() => {
-                    handleEditMessage(message.id)
                     handleClose()
+                    handleEditMessage(message.id)
                   }}
                 >
                   Edit
@@ -190,8 +185,8 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
           )}
         </div>
       ) : (
-        <Typography style={{ margin: '15px 0' }}>
-          {formatDate(message.createdAt)}
+        <Typography sx={{ margin: '15px 0', fontSize: 14, opacity: .8, }}>
+          {formatDate(message.createdAt) + ' - ' + formatTime(message.createdAt)}
         </Typography>
       )}
     </div>

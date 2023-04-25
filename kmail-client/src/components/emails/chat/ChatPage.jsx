@@ -70,6 +70,8 @@ const ChatPage = () => {
   }
 
   useEffect(() => {
+    setMessageToEdit(null)
+    setMessageInput('')
     setChatId(chat_id)
     axios
       .get(`chats/get/${chat_id}`)
@@ -118,15 +120,15 @@ const ChatPage = () => {
     setMessages([message, ...messages])
   }, [message])
 
-  function submitEditMessage(event, type) {
-    event.preventDefault()
+  function submitEditMessage(type) {
     setMessageInput('')
     focusInput()
+    setMessageToEdit(null)
     axios
       .put('chats/messages/edit', {
         event: type,
         editorId: user.id,
-        id: messageToEdit,
+        messageId: messageToEdit,
         text: messageInput,
       })
       .then(({ data }) => {

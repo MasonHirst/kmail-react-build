@@ -164,7 +164,7 @@ module.exports = {
         where: { chat_id: id },
         order: [['updatedAt', 'DESC']],
         limit: limit, // load only 'limit' number of messages
-        offset: (offset) * limit,
+        offset: offset * limit,
       })
       res.send(messages)
     } catch (err) {
@@ -193,6 +193,24 @@ module.exports = {
       res.send(message)
     } catch (err) {
       console.log(err)
+      res.status(403).send(err)
+    }
+  },
+
+  editMessage: async (req, res) => {
+    const { event, editorId, text, messageId } = req.body
+    try {
+      if (event === 'editMessage') {
+        const updatedText = await Message.update(
+          { text, edited: true },
+          { where: { id: messageId } }
+        )
+        return res.send(updatedText)
+      } else if (event === 'newReaction') {
+        res.send('function needs finishing')
+      }
+      res.send('unknown protocall request')
+    } catch (err) {
       res.status(403).send(err)
     }
   },

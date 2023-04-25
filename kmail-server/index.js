@@ -48,6 +48,7 @@ const {
   getLatestMessage,
   createMessage,
   getAllMessages,
+  editMessage,
 } = require('./controllers/userController')
 // const { getLabels, getTestInfo } = require('./emailFetch')
 const { getTestInfo } = require('./controllers/emailApiController')
@@ -71,6 +72,7 @@ app.get('/user/conversations/get', validateToken, getConversations)
 app.get('/chat/:id/messages', validateToken, getLatestMessage)
 app.post('/chats/messages/create', validateToken, createMessage)
 app.get('/chat/:id/messages/:offset/:limit', validateToken, getAllMessages)
+app.put('/chats/messages/edit', validateToken, editMessage)
 
 //! Socket server
 const { WebSocketServer, WebSocket } = require('ws')
@@ -92,7 +94,6 @@ wss.on('connection', function connection(ws, req) {
         const claims = await verifyAccessToken(body.authorization)
         ws.userId = claims.sub
         connections[claims.sub] = ws
-        console.log('authorize happened', claims.sub)
       } else if (event === 'chatMessage') {
         // pull recipient id from parsedData.body
         // get client by userId
@@ -100,8 +101,6 @@ wss.on('connection', function connection(ws, req) {
         const { text, recipient_id, createdAt } = body
         console.log(createdAt)
         const newBody = JSON.stringify({ sender_id: ws.userId, text, createdAt })
-        console.log({newBody})
-        console.log('chat Message: ', ws.userId)
         if (!recipient_id) return console.log('recipient_id is required')
         const client = connections[recipient_id]
         if (!client) return console.log('other person not online')
@@ -110,7 +109,6 @@ wss.on('connection', function connection(ws, req) {
     })
 
     ws.on('close', function (event) {
-      console.log('CLOSE EVENT: ', ws.userId)
       delete connections[ws.userId]
     })
   } catch (err) {
