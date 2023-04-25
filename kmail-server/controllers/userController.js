@@ -1,4 +1,5 @@
 const User = require('../models/users')
+const { sendMessageToClient } = require('./socketController')
 const Message = require('../models/messages')
 const Chat = require('../models/chats')
 require('dotenv').config()
@@ -162,7 +163,7 @@ module.exports = {
     try {
       const messages = await Message.findAll({
         where: { chat_id: id },
-        order: [['updatedAt', 'DESC']],
+        order: [['createdAt', 'DESC']],
         limit: limit, // load only 'limit' number of messages
         offset: offset * limit,
       })
@@ -198,19 +199,22 @@ module.exports = {
   },
 
   editMessage: async (req, res) => {
-    const { event, editorId, text, messageId } = req.body
+    const { event, editorId, recipient_id, text, messageId } = req.body
     try {
       if (event === 'editMessage') {
         const updatedText = await Message.update(
           { text, edited: true },
           { where: { id: messageId } }
         )
+        const body = JSON.stringify({event_type: 'updatedMessage', messageId, text, id: messageId})
+        sendMessageToClient([editorId, recipient_id], body)
         return res.send(updatedText)
       } else if (event === 'newReaction') {
         res.send('function needs finishing')
       }
       res.send('unknown protocall request')
     } catch (err) {
+      console.log(err)
       res.status(403).send(err)
     }
   },

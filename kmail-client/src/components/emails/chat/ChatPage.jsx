@@ -13,7 +13,7 @@ const ChatPage = () => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
-  const { message, sendMessage } = useContext(SocketContext)
+  const { message, sendMessage, updatedMessage } = useContext(SocketContext)
   const { chat_id } = useParams()
   const [otherUser, setOtherUser] = useState({})
   const [messageInput, setMessageInput] = useState('')
@@ -26,6 +26,20 @@ const ChatPage = () => {
   const [showDownBtn, setShowDownBtn] = useState(false)
   const limit = 50
 
+  useEffect(() => {
+    if (!updatedMessage) return
+    const newArray = messages.map((obj) => {
+      if (obj.id === updatedMessage.id) {
+        obj.text = updatedMessage.text
+        obj.edited = true
+        return obj;
+      } else {
+        return obj;
+      }
+    })
+    setMessages(newArray)
+  }, [updatedMessage])
+
   function focusInput() {
     setTimeout(() => {
       const input = inputRef.current
@@ -33,11 +47,10 @@ const ChatPage = () => {
       input.setSelectionRange(input.value.length, input.value.length)
     }, 100)
   }
-  
+
   function handleEditMessage(target) {
-    const found = messages.find((item) => item.id === target)
-    setMessageInput(found.text)
-    setMessageToEdit(found.id)
+    setMessageInput(target.text)
+    setMessageToEdit(target.id)
     focusInput()
   }
 
@@ -128,6 +141,7 @@ const ChatPage = () => {
       .put('chats/messages/edit', {
         event: type,
         editorId: user.id,
+        recipient_id: otherUser.id,
         messageId: messageToEdit,
         text: messageInput,
       })
@@ -270,12 +284,15 @@ const ChatPage = () => {
           </div>
         )}
       </div>
-      <form onSubmit={(e) => {
-        e.preventDefault()
-        if (messageToEdit) {
-          submitEditMessage('editMessage')
-        } else handleSubmit()
-      }} className="chat-message-input-div">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (messageToEdit) {
+            submitEditMessage('editMessage')
+          } else handleSubmit()
+        }}
+        className="chat-message-input-div"
+      >
         <div
           className={
             darkTheme

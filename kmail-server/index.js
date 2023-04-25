@@ -75,46 +75,8 @@ app.get('/chat/:id/messages/:offset/:limit', validateToken, getAllMessages)
 app.put('/chats/messages/edit', validateToken, editMessage)
 
 //! Socket server
-const { WebSocketServer, WebSocket } = require('ws')
-const wss = new WebSocketServer({ port: 8085 })
-
-const connections = {}
-
-wss.on('connection', function connection(ws, req) {
-  try {
-    // console.log('connection happened')
-    ws.on('error', console.error)
-    ws.on('message', async function message(data, isBinary) {
-      const { event, body } = JSON.parse(data)
-      if (event === 'authorize') {
-        // validate jwt
-        // associate userId to client
-        // add to list of clients
-        if (!body.authorization) return console.log('no authorization')
-        const claims = await verifyAccessToken(body.authorization)
-        ws.userId = claims.sub
-        connections[claims.sub] = ws
-      } else if (event === 'chatMessage') {
-        // pull recipient id from parsedData.body
-        // get client by userId
-        // send message to that one client
-        const { text, recipient_id, createdAt } = body
-        console.log(createdAt)
-        const newBody = JSON.stringify({ sender_id: ws.userId, text, createdAt })
-        if (!recipient_id) return console.log('recipient_id is required')
-        const client = connections[recipient_id]
-        if (!client) return console.log('other person not online')
-        client.send(newBody, { binary: isBinary })
-      }
-    })
-
-    ws.on('close', function (event) {
-      delete connections[ws.userId]
-    })
-  } catch (err) {
-    console.error(err)
-  }
-})
+const { startSocketServer } = require('./controllers/socketController')
+startSocketServer()
 
 //! Server listen
 const { SERVER_PORT } = process.env

@@ -9,6 +9,7 @@ const send = (socket, event, body) => {
 
 export const SocketProvider = ({ children }) => {
   const [message, setMessage] = useState('')
+  const [updatedMessage, setUpdatedMessage] = useState('')
   const [socket, setSocket] = useState()
   
   useEffect(() => {
@@ -24,7 +25,11 @@ export const SocketProvider = ({ children }) => {
       // console.log(JSON.parse(event.data));
       if (!event?.data) return
       let messageData = JSON.parse(event.data)
-      setMessage(messageData)
+      if (messageData.event_type === 'newMessage') {
+        setMessage(messageData)
+      } else if (messageData.event_type === 'updatedMessage') {
+        setUpdatedMessage(messageData)
+      }
     })
     
     setSocket(ws)
@@ -43,7 +48,7 @@ export const SocketProvider = ({ children }) => {
   }, [socket])
 
   return (
-    <SocketContext.Provider value={{ message, sendMessage }}>
+    <SocketContext.Provider value={{ message, sendMessage, updatedMessage }}>
       {children}
     </SocketContext.Provider>
   )

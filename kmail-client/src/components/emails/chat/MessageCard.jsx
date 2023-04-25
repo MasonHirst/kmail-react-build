@@ -37,52 +37,54 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
   }
 
   function formatDate(val) {
-    const date = new Date(val);
-    const now = new Date();
-  
+    const date = new Date(val)
+    const now = new Date()
+
     // Check if date is today
     if (
       date.getDate() === now.getDate() &&
       date.getMonth() === now.getMonth() &&
       date.getFullYear() === now.getFullYear()
     ) {
-      return "Today";
+      return 'Today'
     }
-  
+
     // Check if date is yesterday
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
+    const yesterday = new Date(now)
+    yesterday.setDate(now.getDate() - 1)
     if (
       date.getDate() === yesterday.getDate() &&
       date.getMonth() === yesterday.getMonth() &&
       date.getFullYear() === yesterday.getFullYear()
     ) {
-      return "Yesterday";
+      return 'Yesterday'
     }
-  
+
     // Check if date is in the same year
     if (date.getFullYear() === now.getFullYear()) {
       const monthNames = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
       ]
       return `${monthNames[date.getMonth()]} ${date.getDate()}`
     }
-  
+
     // Date is not in the same year
-    return `${date.toLocaleString("default", { month: "long" })} ${date.getDate()}, ${date.getFullYear()}`
+    return `${date.toLocaleString('default', {
+      month: 'long',
+    })} ${date.getDate()}, ${date.getFullYear()}`
   }
-  
+
   return (
     <div
       onClick={handleClick}
@@ -130,7 +132,10 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
                   : 'message-bubble message-bubble-right'
               }
             >
-              <Typography>{message.text}</Typography>
+              <div>
+                {message.text}{' '}
+                {message.edited && <p style={{fontSize: 14, opacity: .7, textAlign: message.sender_id !== user.id ? 'left' : 'right'}}>(edited)</p>}
+              </div>
             </div>
             <IconButton
               onClick={handleMoreOptions}
@@ -152,12 +157,13 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
               anchorEl={anchorEl}
               open={open}
               onClose={handleClose}
+              elevation={2}
             >
               {message.sender_id === user.id && (
                 <MenuItem
                   onClick={() => {
                     handleClose()
-                    handleEditMessage(message.id)
+                    handleEditMessage(message)
                   }}
                 >
                   Edit
@@ -176,7 +182,6 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
                   ? 'message-details-text details-left'
                   : 'message-details-text details-right'
               }
-              // color={darkTheme ? 'white' : 'black'}
             >
               {formatTime(message.createdAt)}
             </Typography>
@@ -185,8 +190,10 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
           )}
         </div>
       ) : (
-        <Typography sx={{ margin: '15px 0', fontSize: 14, opacity: .8, }}>
-          {formatDate(message.createdAt) + ' - ' + formatTime(message.createdAt)}
+        <Typography sx={{ margin: '15px 0', fontSize: 14, opacity: 0.8 }}>
+          {formatDate(message.createdAt) +
+            ' - ' +
+            formatTime(message.createdAt)}
         </Typography>
       )}
     </div>
