@@ -13,7 +13,8 @@ const ChatPage = () => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
-  const { message, sendMessage, updatedMessage } = useContext(SocketContext)
+  const { message, sendMessage, updatedMessage, setMessage, updatedReaction } =
+    useContext(SocketContext)
   const { chat_id } = useParams()
   const [otherUser, setOtherUser] = useState({})
   const [messageInput, setMessageInput] = useState('')
@@ -26,15 +27,38 @@ const ChatPage = () => {
   const [showDownBtn, setShowDownBtn] = useState(false)
   const limit = 50
 
+  function handleSubmitEmoji(emoji, reactMessage, user) {
+    axios
+      .put('chats/messages/edit/reaction', { emoji, reactMessage, user })
+      .then(({ data }) => {})
+      .catch(console.error)
+  }
+
+  useEffect(() => {
+    if (!updatedReaction.length) return
+    const newArr = [...messages]
+    for (let i = 0; i < updatedReaction.length; i++) {
+      const messageId = updatedReaction[i].reactMessage.id
+      const react = updatedReaction[i].reaction
+      for (let j = 0; j < newArr.length; j++) {
+        if (messageId === newArr[j].id) {
+          newArr[j].reaction = react
+          break
+        }
+      }
+    }
+    setMessages(newArr)
+  }, [updatedReaction])
+
   useEffect(() => {
     if (!updatedMessage) return
     const newArray = messages.map((obj) => {
       if (obj.id === updatedMessage.id) {
         obj.text = updatedMessage.text
         obj.edited = true
-        return obj;
+        return obj
       } else {
-        return obj;
+        return obj
       }
     })
     setMessages(newArray)
@@ -84,7 +108,7 @@ const ChatPage = () => {
   useEffect(() => {
     setMessageToEdit(null)
     setMessageInput('')
-    setChatId(chat_id)
+    if (chat_id !== '') setChatId(chat_id)
     axios
       .get(`chats/get/${chat_id}`)
       .then(({ data }) => {
@@ -95,7 +119,7 @@ const ChatPage = () => {
           setOtherUser(data.user1)
         }
       })
-      .catch(console.log)
+      .catch(console.error)
   }, [chat_id])
 
   useEffect(() => {
@@ -142,26 +166,22 @@ const ChatPage = () => {
         messageId: messageToEdit,
         text: messageInput,
       })
-      .then(({ data }) => {
-
-      })
+      .then(({ data }) => {})
       .catch(console.error)
   }
 
   function handleSubmit(event) {
-    setMessages([
-      {
-        sender_id: user.id,
-        createdAt: new Date(),
-        text: messageInput,
-      },
-      ...messages,
-    ])
-    sendMessage({
-      text: messageInput,
+    const obj = {
+      sender_id: user.id,
       recipient_id: otherUser.id,
       createdAt: new Date(),
-    })
+      text: messageInput,
+      chat_id,
+      reaction: [],
+    }
+    setMessages([obj, ...messages])
+    sendMessage(obj)
+    setMessage(obj)
 
     setIsLightLoading(true)
     axios
@@ -170,7 +190,7 @@ const ChatPage = () => {
         recipient: otherUser.id,
         chat: chat_id,
       })
-      .then(({ data }) => {
+      .then(() => {
         setMessageInput('')
         focusInput()
       })
@@ -223,6 +243,7 @@ const ChatPage = () => {
         key={index}
         message={message}
         otherUser={otherUser}
+        handleSubmitEmoji={handleSubmitEmoji}
       />
     )
   })

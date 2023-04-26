@@ -4,6 +4,7 @@ const Message = require('../models/messages')
 const Chat = require('../models/chats')
 require('dotenv').config()
 const { Op } = require('sequelize')
+const { Sequelize, sequelize } = require('sequelize')
 
 module.exports = {
   updateDarkMode: async (req, res) => {
@@ -43,7 +44,7 @@ module.exports = {
       })
       res.status(200).send(filteredUsers)
     } catch (err) {
-      console.log(err)
+      console.error(err)
       res.status(403).send(err)
     }
   },
@@ -59,7 +60,7 @@ module.exports = {
           ],
         },
       })
-      // console.log(findChat)
+
       if (findChat) {
         return res.status(200).send(findChat)
       } else {
@@ -113,6 +114,7 @@ module.exports = {
       for (i = 0; i < conversations.length; i++) {
         let hasMessage = await Message.findOne({
           where: { chat_id: conversations[i].id },
+          order: [['createdAt', 'DESC']],
         })
         if (hasMessage) {
           if (conversations[i].user1 === userId) {
@@ -121,6 +123,8 @@ module.exports = {
             })
             loopedConversations.push({
               chat: conversations[i],
+              latest_message: hasMessage,
+              otherId: otherUser.id,
               username: otherUser.username,
               profile_pic: otherUser.profile_pic,
             })
@@ -130,6 +134,8 @@ module.exports = {
             })
             loopedConversations.push({
               chat: conversations[i],
+              latest_message: hasMessage,
+              otherId: otherUser.id,
               username: otherUser.username,
               profile_pic: otherUser.profile_pic,
             })
@@ -139,7 +145,7 @@ module.exports = {
 
       res.status(200).send(loopedConversations)
     } catch (err) {
-      console.log(err)
+      console.error(err)
       res.status(403).send(err)
     }
   },
@@ -153,7 +159,7 @@ module.exports = {
       })
       res.send(message)
     } catch (err) {
-      console.log(err)
+      console.error(err)
       res.status(403).send(err)
     }
   },
@@ -169,7 +175,7 @@ module.exports = {
       })
       res.send(messages)
     } catch (err) {
-      console.log(err)
+      console.error(err)
       res.status(403).send(err)
     }
   },
@@ -180,7 +186,7 @@ module.exports = {
       let message = Message.create({
         text,
         edited: false,
-        reaction: { emoji: '' },
+        reaction: [],
         sender_id: userId,
         recipient_id: recipient,
         chat_id: chat,
@@ -196,7 +202,7 @@ module.exports = {
       }
       res.send(message)
     } catch (err) {
-      console.log(err)
+      console.error(err)
       res.status(403).send(err)
     }
   },
@@ -222,7 +228,40 @@ module.exports = {
       }
       res.send('unknown protocall request')
     } catch (err) {
-      console.log(err)
+      console.error(err)
+      res.status(403).send(err)
+    }
+  },
+
+  editReaction: async (req, res) => {
+    const { emoji, reactMessage, user } = req.body
+    try {
+      console.log('------------------------', reactMessage.reaction)
+      const checkArray = reactMessage.reaction.filter(
+        (item) => item.user.id === user.id
+      )
+      if (checkArray.length) {
+        const index = reactMessage.reaction.findIndex(
+          (item) => item.user.id === user.id
+        )
+        reactMessage.reaction.splice(index, 1)
+      }
+      const reactionObj = [
+        ...reactMessage.reaction,
+        { emoji, user, reactMessage },
+      ]
+      const body = JSON.stringify({
+        event_type: 'updatedReaction',
+        reaction: reactionObj,
+      })
+      sendMessageToClient([reactMessage.sender_id, reactMessage.recipient_id], body)
+      const updatedReaction = await Message.update(
+        { reaction: reactionObj },
+        { where: { id: reactMessage.id } }
+      )
+      res.send(updatedReaction)
+    } catch (err) {
+      console.error(err)
       res.status(403).send(err)
     }
   },
