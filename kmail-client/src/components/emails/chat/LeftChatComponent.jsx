@@ -17,14 +17,23 @@ const LeftChatComponent = () => {
   const [conversations, setConversations] = useState([])
   
   const mappedConversations = conversations.map((conv, index) => {
-    return <ChatPreviewCard key={index} user={conv} />
+    return <ChatPreviewCard key={index} data={conv} />
   })
 
   useEffect(() => {
+    if (!message) return
+    const newArr = [...conversations]
+    const index = newArr.findIndex((item) => item.chat.id === message.chat_id)
+    const obj = newArr[index]
+    obj.latest_message = message
+    newArr.splice(index, 1)
+    newArr.unshift(obj)
+    setConversations(newArr)
+  }, [message])
 
+  useEffect(() => {
     axios.get('user/conversations/get')
       .then(({data}) => {
-        console.log(data)
         setConversations(data)
       })
       .catch(err => {
@@ -32,9 +41,10 @@ const LeftChatComponent = () => {
       })
 
       return () => {
-        setChatId('')
+        // setChatId('')
+        // can't remember why this is here, but it messes up other functions
       }
-  }, [chatId, message])
+  }, [chatId])
   
   return (
     <div className='left-chat-div'>

@@ -2,15 +2,35 @@ import React, { useContext, useState } from 'react'
 import muiStyles from '../../../styles/muiStyles'
 import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { AuthContext } from '../../../context/AuthenticationContext'
-const { Button, Typography, Avatar, IconButton, MoreVertIcon, MenuItem, Menu } =
-  muiStyles
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
+const {
+  Button,
+  Typography,
+  Avatar,
+  IconButton,
+  MoreVertIcon,
+  MenuItem,
+  Menu,
+  Dialog,
+} = muiStyles
 
-const MessageCard = ({ message, otherUser, handleEditMessage }) => {
+const MessageCard = ({
+  message,
+  otherUser,
+  handleEditMessage,
+  handleSubmitEmoji,
+}) => {
   const { darkTheme } = useContext(DarkModeContext)
   const [showDetails, setShowDetails] = useState(false)
   const { user } = useContext(AuthContext)
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
+  const [showEmojiDialog, setShowEmojiDialog] = useState(false)
+
+  // function handleSelectEmoji(event) {
+
+  // }
 
   function handleClick() {
     setShowDetails(!showDetails)
@@ -20,7 +40,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
     setAnchorEl(event.currentTarget)
   }
 
-  const handleClose = (event) => {
+  const handleClose = () => {
     setAnchorEl(null)
   }
 
@@ -134,7 +154,18 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
             >
               <div>
                 {message.text}{' '}
-                {message.edited && <p style={{fontSize: 14, opacity: .7, textAlign: message.sender_id !== user.id ? 'left' : 'right'}}>(edited)</p>}
+                {message.edited && (
+                  <p
+                    style={{
+                      fontSize: 14,
+                      opacity: 0.7,
+                      textAlign:
+                        message.sender_id !== user.id ? 'left' : 'right',
+                    }}
+                  >
+                    (edited)
+                  </p>
+                )}
               </div>
             </div>
             <IconButton
@@ -170,7 +201,14 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
                 </MenuItem>
               )}
 
-              <MenuItem onClick={handleClose}>React</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose()
+                  setShowEmojiDialog(true)
+                }}
+              >
+                React
+              </MenuItem>
               <MenuItem onClick={handleClose}>Delete</MenuItem>
             </Menu>
           </div>
@@ -196,6 +234,20 @@ const MessageCard = ({ message, otherUser, handleEditMessage }) => {
             formatTime(message.createdAt)}
         </Typography>
       )}
+      <Dialog onClose={() => setShowEmojiDialog(false)} open={showEmojiDialog}>
+        <Picker
+          data={data}
+          // emojiButtonSize={26}
+          // emojiSize={20}
+          autoFocus
+          onEmojiSelect={(event) => {
+            handleSubmitEmoji(event, message, user)
+            setShowEmojiDialog(false)
+          }}
+          // previewPosition="none"
+          theme={darkTheme ? 'dark' : 'light'}
+        />
+      </Dialog>
     </div>
   )
 }

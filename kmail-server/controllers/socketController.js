@@ -43,12 +43,14 @@ module.exports = {
           } else if (event === 'chatMessage') {
             // pull recipient id from parsedData.body
             // send message to that one client
-            const { text, recipient_id, createdAt } = body
+            const { text, recipient_id, createdAt, chat_id, reaction } = body
             const newBody = JSON.stringify({
               event_type: 'newMessage',
               sender_id: ws.userId,
               text,
               createdAt,
+              chat_id,
+              reaction,
             })
             if (!recipient_id) return console.log('recipient_id is required')
             sendMessageToClient(recipient_id, newBody)

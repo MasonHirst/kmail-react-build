@@ -20,9 +20,11 @@ Message.belongsTo(User, { foreignKey: 'sender_id' })
 Message.belongsTo(User, { foreignKey: 'recipient_id' })
 Message.belongsTo(Chat, { foreignKey: 'chat_id' })
 
+
 Chat.belongsTo(User, { foreignKey: 'user1' })
 Chat.belongsTo(User, { foreignKey: 'user2' })
 
+// Chat.hasMany(Message)
 User.hasMany(Contact)
 Contact.belongsTo(User, { foreignKey: 'contact_id' })
 
@@ -37,7 +39,6 @@ const {
   updateProfilePic,
   verifyLogin,
   getLocalUser,
-  verifyAccessToken,
 } = require('./controllers/authController')
 const {
   updateDarkMode,
@@ -49,6 +50,7 @@ const {
   createMessage,
   getAllMessages,
   editMessage,
+  editReaction,
 } = require('./controllers/userController')
 // const { getLabels, getTestInfo } = require('./emailFetch')
 const { getTestInfo } = require('./controllers/emailApiController')
@@ -73,6 +75,7 @@ app.get('/chat/:id/messages', validateToken, getLatestMessage)
 app.post('/chats/messages/create', validateToken, createMessage)
 app.get('/chat/:id/messages/:offset/:limit', validateToken, getAllMessages)
 app.put('/chats/messages/edit', validateToken, editMessage)
+app.put('/chats/messages/edit/reaction', validateToken, editReaction)
 
 //! Socket server
 const { startSocketServer } = require('./controllers/socketController')

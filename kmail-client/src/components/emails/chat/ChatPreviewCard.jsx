@@ -5,25 +5,13 @@ import { AuthContext } from '../../../context/AuthenticationContext'
 import muiStyles from '../../../styles/muiStyles'
 const { IconButton, Avatar, Typography, Button } = muiStyles
 
-const ChatPreviewCard = ({ user }) => {
-  const { chatId } = useContext(AuthContext)
+const ChatPreviewCard = ({ data }) => {
+  const { chatId, user } = useContext(AuthContext)
   const navigate = useNavigate()
-  const [message, setMessage] = useState([])
-
-  useEffect(() => {
-    axios
-      .get(`chat/${user.chat.id}/messages`)
-      .then(({ data }) => {
-        setMessage(data)
-      })
-      .catch((err) => {
-        console.error('ERROR IN CHAT PREVIEW CARD: ', err)
-      })
-  }, [chatId])
 
   function handleClick() {
-    if (user.chat.id !== chatId) {
-      navigate(user.chat.id)
+    if (data.chat.id !== chatId) {
+      navigate(data.chat.id)
     }
   }
 
@@ -62,8 +50,8 @@ const ChatPreviewCard = ({ user }) => {
     <Button onClick={handleClick} fullWidth className="chat-preview-card">
       <Avatar
         sx={{ width: 45, height: 45, color: 'white' }}
-        alt={user.username}
-        src={user.profile_pic}
+        alt={data.username}
+        src={data.profile_pic}
       />
       <div
         style={{
@@ -74,17 +62,17 @@ const ChatPreviewCard = ({ user }) => {
         }}
       >
         <Typography variant="subtitle" sx={{ fontSize: '18px' }}>
-          {user.username}
+          {data.username}
         </Typography>
         <Typography
           variant="subtitle2"
           sx={{ fontSize: '13px', opacity: 0.75, textAlign: 'left', textOverflow: 'ellipsis !important', maxWidth: '130px', overflow: 'hidden', whiteSpace: 'nowrap', }}
         >
-          {message.text}
+          {data.latest_message.sender_id === user.id && 'You: '} {data.latest_message.text}
         </Typography>
       </div>
       <Typography variant="subtitle" sx={{ fontSize: '12px', opacity: 0.6, whiteSpace: 'nowrap' }}>
-        {formatDate(message.createdAt)}
+        {formatDate(data.latest_message.createdAt)}
       </Typography>
     </Button>
   )

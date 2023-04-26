@@ -60,8 +60,10 @@ import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
+import Dialog from '@mui/material/Dialog';
 
 let muiStyles = {
+  Dialog,
   EditIcon,
   MoreVertIcon,
   ArrowBackOutlinedIcon,
