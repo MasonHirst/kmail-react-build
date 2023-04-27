@@ -11,7 +11,8 @@ function sendMessageToClient(recipientId, message) {
         console.log(`client ${recipientId[i]} person not online`)
         return
       }
-      client.send(message)
+      const body = JSON.stringify(message)
+      client.send(body)
     }
   } else {
     const client = connections[recipientId]
@@ -40,20 +41,6 @@ module.exports = {
             const claims = await verifyAccessToken(body.authorization)
             ws.userId = claims.sub
             connections[claims.sub] = ws
-          } else if (event === 'chatMessage') {
-            // pull recipient id from parsedData.body
-            // send message to that one client
-            const { text, recipient_id, createdAt, chat_id, reaction } = body
-            const newBody = JSON.stringify({
-              event_type: 'newMessage',
-              sender_id: ws.userId,
-              text,
-              createdAt,
-              chat_id,
-              reaction,
-            })
-            if (!recipient_id) return console.log('recipient_id is required')
-            sendMessageToClient(recipient_id, newBody)
           }
         })
 

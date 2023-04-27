@@ -13,6 +13,28 @@
   align-items: center;
 }
 
+.reactions-card {
+  position: absolute;
+  bottom: -18px;
+  padding: 2px 5px;
+  right: 0;
+  border-radius: 25px !important;
+}
+.reactions-card-light {
+
+}
+.reactions-card-light:hover {
+  background-color: #e3d7d7 !important;
+  cursor: pointer;
+}
+.reactions-card-dark {
+  background-color: #1f2127 !important;
+}
+.reactions-card-dark:hover {
+  background-color: #3a3c44 !important;
+  cursor: pointer;
+}
+
 .cancel-edit-btn {
   position: absolute !important;
   top: 0px !important;
@@ -29,11 +51,17 @@
   bottom: 90px !important;
   left: 50%;
   transform: translateX(-50%);
-  background-color: aqua !important;
   z-index: 5 !important;
   border-radius: 17px !important;
   text-transform: none !important;
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 3px 12px !important;
+}
+.to-bot-btn-dark {
+  background-color: rgb(131, 123, 123) !important;
+  color: black !important;
+}
+.to-bot-btn-light {
+  background-color: rgb(62, 82, 199) !important;
+  color: white!important;
 }
 
 .chat-preview-card {
@@ -212,16 +240,24 @@
   display: block !important
 }
 .message-bubble {
+  position: relative !important;
   padding: 12px;
   border-radius: 27px;
   text-align: left;
 }
 .message-bubble-left {
-  background-color: #303030;
+  background-color: #414141;
   color: white;
 }
 .message-bubble-right {
   background-color: #7BACF8;
+  color: black;
+}
+.message-bubble-with-reaction {
+  margin-bottom: 12px;
+}
+.message-bubble-left-light {
+  background-color: #f5f5f5 !important;
   color: black;
 }
 
