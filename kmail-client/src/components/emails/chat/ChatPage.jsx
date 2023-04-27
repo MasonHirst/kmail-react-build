@@ -7,11 +7,14 @@ import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { useParams } from 'react-router-dom'
 import { AuthContext } from '../../../context/AuthenticationContext'
 import { SocketContext } from '../../../context/SocketContext'
-const { Button, Typography, Avatar, IconButton, SendIcon } = muiStyles
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
+const { Button, Typography, Avatar, IconButton, SendIcon, Dialog } = muiStyles
 
 const ChatPage = () => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
+  const [messageLoading, setMessageLoading] = useState(false)
   const { darkTheme } = useContext(DarkModeContext)
   const { message, sendMessage, updatedMessage, setMessage, updatedReaction } =
     useContext(SocketContext)
@@ -25,12 +28,19 @@ const ChatPage = () => {
   const [messagesEnd, setMessagesEnd] = useState(false)
   const conversationDivRef = useRef()
   const [showDownBtn, setShowDownBtn] = useState(false)
+  const [showEmojiDialog, setShowEmojiDialog] = useState(false)
+  const [messageToReact, setMessageToReact] = useState({})
   const limit = 50
 
-  function handleSubmitEmoji(emoji, reactMessage, user) {
+  function openDialog(messageObj) {
+    setMessageToReact(messageObj)
+    setShowEmojiDialog(true)
+  }
+
+  function handleSubmitEmoji(emoji, user) {
     axios
-      .put('chats/messages/edit/reaction', { emoji, reactMessage, user })
-      .then(({ data }) => {})
+      .put('chats/messages/edit/reaction', { emoji, reactMessage: messageToReact, user })
+      .then(() => {})
       .catch(console.error)
   }
 
@@ -39,7 +49,7 @@ const ChatPage = () => {
     const newArr = [...messages]
     for (let i = 0; i < updatedReaction.length; i++) {
       const messageId = updatedReaction[i].reactMessage.id
-      const react = updatedReaction[i].reaction
+      const react = updatedReaction[i].reactMessage.reaction
       for (let j = 0; j < newArr.length; j++) {
         if (messageId === newArr[j].id) {
           newArr[j].reaction = react
@@ -171,19 +181,8 @@ const ChatPage = () => {
   }
 
   function handleSubmit(event) {
-    const obj = {
-      sender_id: user.id,
-      recipient_id: otherUser.id,
-      createdAt: new Date(),
-      text: messageInput,
-      chat_id,
-      reaction: [],
-    }
-    setMessages([obj, ...messages])
-    sendMessage(obj)
-    setMessage(obj)
-
-    setIsLightLoading(true)
+    setMessageInput('')
+    setMessageLoading(true)
     axios
       .post('chats/messages/create', {
         text: messageInput,
@@ -191,13 +190,12 @@ const ChatPage = () => {
         chat: chat_id,
       })
       .then(() => {
-        setMessageInput('')
         focusInput()
       })
       .catch((err) => {
         console.error('ERROR IN CHAT PAGE MESSAGESENDER: ', err)
       })
-      .finally(() => setIsLightLoading(false))
+      .finally(() => setMessageLoading(false))
   }
 
   function addDateMarkers(messages) {
@@ -210,6 +208,7 @@ const ChatPage = () => {
         markedMessages.push({
           sender_id: 'date marker',
           createdAt: currentMessage.createdAt,
+          reaction: [],
         })
       }
       // If this message and the next message are on different days, add a date marker for the current message's createdAt date
@@ -220,6 +219,7 @@ const ChatPage = () => {
         markedMessages.push({
           sender_id: 'date marker',
           createdAt: currentMessage.createdAt,
+          reaction: [],
         })
       }
       markedMessages.push(currentMessage)
@@ -243,7 +243,7 @@ const ChatPage = () => {
         key={index}
         message={message}
         otherUser={otherUser}
-        handleSubmitEmoji={handleSubmitEmoji}
+        openDialog={openDialog}
       />
     )
   })
@@ -251,7 +251,7 @@ const ChatPage = () => {
   return (
     <div style={{ height: '100%', position: 'relative' }}>
       {showDownBtn && (
-        <Button onClick={handleScrollDown} className="to-bot-btn">
+        <Button onClick={handleScrollDown} className={darkTheme ? "to-bot-btn to-bot-btn-dark" : "to-bot-btn to-bot-btn-light"}>
           Back to bottom
         </Button>
       )}
@@ -318,7 +318,7 @@ const ChatPage = () => {
           }
         >
           <input
-            disabled={isLightLoading}
+            disabled={messageLoading}
             value={messageInput}
             ref={inputRef}
             onChange={(e) => setMessageInput(e.target.value)}
@@ -339,7 +339,7 @@ const ChatPage = () => {
           )}
         </div>
         <IconButton
-          disabled={messageInput === '' || isLightLoading}
+          disabled={messageInput === '' || messageLoading}
           type="submit"
           sx={{ padding: '18px' }}
           className={darkTheme ? 'background-dark' : 'background-light'}
@@ -347,6 +347,17 @@ const ChatPage = () => {
           <SendIcon />
         </IconButton>
       </form>
+      <Dialog onClose={() => setShowEmojiDialog(false)} open={showEmojiDialog}>
+        <Picker
+          data={data}
+          autoFocus
+          onEmojiSelect={(event) => {
+            handleSubmitEmoji(event, user)
+            setShowEmojiDialog(false)
+          }}
+          theme={darkTheme ? 'dark' : 'light'}
+        />
+      </Dialog>
     </div>
   )
 }

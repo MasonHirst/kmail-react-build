@@ -21,11 +21,22 @@ export const SocketProvider = ({ children }) => {
   const [updatedMessage, setUpdatedMessage] = useState('')
   const [socket, setSocket] = useState()
 
+  console.success = function(message) {
+    console.log("%c✅ " + message, "color: #04A57D; font-weight: bold;");
+  }
+  
+  console.warning = function(message) {
+    console.log("%c⚠️ " + message, "color: yellow; font-weight: bold;");
+  }
+
+  let connectCounter = 0
   useEffect(() => {
     function connectClient() {
       const ws = new WebSocket('ws://localhost:8085')
       const token = localStorage.getItem('jwtAccessToken')
+
       ws.addEventListener('open', function () {
+        if (connectCounter > 0) console.success('Reconnected to socket server')
         send(ws, 'authorize', {
           authorization: token,
         })
@@ -39,8 +50,18 @@ export const SocketProvider = ({ children }) => {
         } else if (messageData.event_type === 'updatedMessage') {
           setUpdatedMessage(messageData)
         } else if (messageData.event_type === 'updatedReaction') {
-          setUpdatedReaction(messageData.reaction)
+          console.log('-------------', messageData)
+          setUpdatedReaction(messageData.reactionObj)
         }
+      })
+
+      ws.addEventListener('close', function () {
+        console.warning('Disconnected from server')
+        connectCounter++
+        setTimeout(() => {
+          console.warning('Reconnecting...')
+          connectClient() // try to reconnect after a delay
+        }, 1000) // wait for 1 second before reconnecting
       })
 
       setSocket(ws)
@@ -55,19 +76,12 @@ export const SocketProvider = ({ children }) => {
     sound.play()
   }, [message])
 
-  const sendMessage = useCallback(
-    (body) => {
-      send(socket, 'chatMessage', body)
-    },
-    [socket]
-  )
-
   return (
     <SocketContext.Provider
       value={{
         message,
         setMessage,
-        sendMessage,
+        // sendMessage,
         updatedMessage,
         updatedReaction,
       }}

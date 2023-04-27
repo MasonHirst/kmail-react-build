@@ -1,37 +1,41 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import muiStyles from '../../../styles/muiStyles'
 import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { AuthContext } from '../../../context/AuthenticationContext'
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
+import Emoji from "react-emoji-render";
+
 const {
   Button,
+  Card,
   Typography,
   Avatar,
   IconButton,
   MoreVertIcon,
   MenuItem,
   Menu,
-  Dialog,
 } = muiStyles
 
-const MessageCard = ({
-  message,
-  otherUser,
-  handleEditMessage,
-  handleSubmitEmoji,
-}) => {
+const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
   const { darkTheme } = useContext(DarkModeContext)
   const [showDetails, setShowDetails] = useState(false)
   const { user } = useContext(AuthContext)
-  const [anchorEl, setAnchorEl] = React.useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
-  const [showEmojiDialog, setShowEmojiDialog] = useState(false)
+  const [messageBubbleClass, setMessageBubbleClass] = useState('message-bubble')
+  
+  useEffect(() => {
+    let className = 'message-bubble'
+    if (message.sender_id !== user.id) {
+      className += ' message-bubble-left'
+      if (!darkTheme) className += ' message-bubble-left-light'
+    }
+    else className +=' message-bubble-right'
+    if (message.reaction.length) className += ' message-bubble-with-reaction'
+    setMessageBubbleClass(className)
+  }, [darkTheme])
 
-  // function handleSelectEmoji(event) {
-
-  // }
-
+  console.log(message.reaction)
+  
   function handleClick() {
     setShowDetails(!showDetails)
   }
@@ -146,11 +150,7 @@ const MessageCard = ({
               />
             )}
             <div
-              className={
-                message.sender_id !== user.id
-                  ? 'message-bubble message-bubble-left'
-                  : 'message-bubble message-bubble-right'
-              }
+              className={messageBubbleClass}
             >
               <div>
                 {message.text}{' '}
@@ -167,6 +167,19 @@ const MessageCard = ({
                   </p>
                 )}
               </div>
+              {!!message.reaction.length && (
+                <Card
+                  className={
+                    darkTheme
+                      ? 'reactions-card reactions-card-dark'
+                      : 'reactions-card reactions-card-light'
+                  }
+                >
+                  {/* <p style={{fontSize: '14px'}}>&#x1F44D;</p> */}
+                  {/* <p style={{fontSize: '14px'}}>&#x{message.reaction[0].emoji.unified};</p> */}
+                  <Emoji text={message.reaction[0].emoji.unified} />
+                </Card>
+              )}
             </div>
             <IconButton
               onClick={handleMoreOptions}
@@ -204,7 +217,7 @@ const MessageCard = ({
               <MenuItem
                 onClick={() => {
                   handleClose()
-                  setShowEmojiDialog(true)
+                  openDialog(message)
                 }}
               >
                 React
@@ -234,20 +247,6 @@ const MessageCard = ({
             formatTime(message.createdAt)}
         </Typography>
       )}
-      <Dialog onClose={() => setShowEmojiDialog(false)} open={showEmojiDialog}>
-        <Picker
-          data={data}
-          // emojiButtonSize={26}
-          // emojiSize={20}
-          autoFocus
-          onEmojiSelect={(event) => {
-            handleSubmitEmoji(event, message, user)
-            setShowEmojiDialog(false)
-          }}
-          // previewPosition="none"
-          theme={darkTheme ? 'dark' : 'light'}
-        />
-      </Dialog>
     </div>
   )
 }
