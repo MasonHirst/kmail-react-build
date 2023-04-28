@@ -3,21 +3,21 @@ const wss = new WebSocketServer({ port: 8085 })
 const { verifyAccessToken } = require('./authController')
 
 const connections = {}
-function sendMessageToClient(recipientId, message) {
+function sendMessageToClient(recipientId, event_type, message) {
   if (Array.isArray(recipientId)) {
     for (let i = 0; i < recipientId.length; i++) {
       const client = connections[recipientId[i]]
       if (!client) {
         console.log(`client ${recipientId[i]} person not online`)
-        return
+      } else {
+        const body = JSON.stringify({ event_type, message })
+        client.send(body)
       }
-      const body = JSON.stringify(message)
-      client.send(body)
     }
   } else {
     const client = connections[recipientId]
     if (!client) {
-      console.log(`client ${recipientId} person not online`)
+      console.log(`client ${recipientId} not online`)
       return
     }
     client.send(message)

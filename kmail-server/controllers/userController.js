@@ -117,7 +117,7 @@ module.exports = {
           order: [['createdAt', 'DESC']],
         })
         if (hasMessage) {
-          console.log('user1: ', conversations[i].user1)
+          // console.log('user1: ', conversations[i].user1)
           if (conversations[i].user1 === userId) {
             let otherUser = await User.findOne({
               where: { id: conversations[i].user2 },
@@ -196,9 +196,9 @@ module.exports = {
         recipient_deleted: false,
       })
       if (message) {
-        message.dataValues.event_type = 'newMessage'
+        console.log('recipients: ', message.recipient_id, message.sender_id)
         sendMessageToClient(
-          [message.recipient_id, message.sender_id],
+          [message.recipient_id, message.sender_id], 'newMessage',
           message.dataValues
         )
         let updateChat = await Chat.update(
@@ -222,12 +222,11 @@ module.exports = {
           { where: { id: messageId } }
         )
         const body = {
-          event_type: 'updatedMessage',
           messageId,
           text,
           id: messageId,
         }
-        sendMessageToClient([editorId, recipient_id], body)
+        sendMessageToClient([editorId, recipient_id], 'updatedMessage', body)
         return res.send(updatedText)
       } else if (event === 'newReaction') {
         res.send('function needs finishing')
@@ -242,20 +241,14 @@ module.exports = {
   editReaction: async (req, res) => {
     const { emoji, reactMessage, user } = req.body
     try {
-      console.log('------------------------', reactMessage.reaction)
       const checkArray = reactMessage.reaction.filter(
         (item) => item.user.id !== user.id
       )
-      console.log('length: ', checkArray.length)
       const reactionObj = [...checkArray, { emoji, user, reactMessage }]
-      console.log('reactionOBJ: ', reactionObj)
-      const body = {
-        event_type: 'updatedReaction',
-        reactionObj,
-      }
+      
       sendMessageToClient(
-        [reactMessage.sender_id, reactMessage.recipient_id],
-        body
+        [reactMessage.sender_id, reactMessage.recipient_id], 'updatedReaction',
+        reactionObj
       )
       const updatedReaction = await Message.update(
         { reaction: reactionObj },

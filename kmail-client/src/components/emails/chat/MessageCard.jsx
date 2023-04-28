@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react'
 import muiStyles from '../../../styles/muiStyles'
 import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { AuthContext } from '../../../context/AuthenticationContext'
-import Emoji from "react-emoji-render";
+import Emoji from 'react-emoji-render'
 
 const {
   Button,
@@ -15,27 +15,24 @@ const {
   Menu,
 } = muiStyles
 
-const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
+const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDialog, openEmojiReactionsDialog }) => {
   const { darkTheme } = useContext(DarkModeContext)
   const [showDetails, setShowDetails] = useState(false)
   const { user } = useContext(AuthContext)
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
   const [messageBubbleClass, setMessageBubbleClass] = useState('message-bubble')
-  
+
   useEffect(() => {
     let className = 'message-bubble'
     if (message.sender_id !== user.id) {
       className += ' message-bubble-left'
       if (!darkTheme) className += ' message-bubble-left-light'
-    }
-    else className +=' message-bubble-right'
+    } else className += ' message-bubble-right'
     if (message.reaction.length) className += ' message-bubble-with-reaction'
     setMessageBubbleClass(className)
   }, [darkTheme])
 
-  console.log(message.reaction)
-  
   function handleClick() {
     setShowDetails(!showDetails)
   }
@@ -63,7 +60,6 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
   function formatDate(val) {
     const date = new Date(val)
     const now = new Date()
-
     // Check if date is today
     if (
       date.getDate() === now.getDate() &&
@@ -72,7 +68,6 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
     ) {
       return 'Today'
     }
-
     // Check if date is yesterday
     const yesterday = new Date(now)
     yesterday.setDate(now.getDate() - 1)
@@ -83,7 +78,6 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
     ) {
       return 'Yesterday'
     }
-
     // Check if date is in the same year
     if (date.getFullYear() === now.getFullYear()) {
       const monthNames = [
@@ -102,12 +96,27 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
       ]
       return `${monthNames[date.getMonth()]} ${date.getDate()}`
     }
-
     // Date is not in the same year
     return `${date.toLocaleString('default', {
       month: 'long',
     })} ${date.getDate()}, ${date.getFullYear()}`
   }
+
+  const emojiArray = []
+  message.reaction.map((emoji) => {
+    if (!emojiArray.length) emojiArray.push({emoji, count: 0})
+    for (let i = 0; i < emojiArray.length; i++) {
+      if (emojiArray[i].emoji.emoji.shortcodes === emoji.emoji.shortcodes) {
+        emojiArray[i].count++
+      } else {
+        emojiArray.push({emoji, count: 0})
+      }
+    }
+  })
+  
+  const mappedEmojis = emojiArray.map((emoji, index) => {
+    return <Emoji key={index}>{emoji.emoji.emoji.shortcodes} {emoji.count > 1 && <span style={{fontSize: '13px', position: 'relative', margin: '0 3px 0 2px',}}>{emoji.count}</span>}</Emoji>
+  })
 
   return (
     <div
@@ -144,14 +153,13 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
                   height: 46,
                   color: 'white',
                   marginRight: '5px',
+                  marginBottom: message.reaction.length ? '12px' : '0',
                 }}
                 alt={otherUser.username}
                 src={otherUser.profile_pic}
               />
             )}
-            <div
-              className={messageBubbleClass}
-            >
+            <div className={messageBubbleClass}>
               <div>
                 {message.text}{' '}
                 {message.edited && (
@@ -169,15 +177,14 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
               </div>
               {!!message.reaction.length && (
                 <Card
-                  className={
+                onClick={() => openEmojiReactionsDialog(message.reaction)}
+                className={
                     darkTheme
                       ? 'reactions-card reactions-card-dark'
                       : 'reactions-card reactions-card-light'
                   }
                 >
-                  {/* <p style={{fontSize: '14px'}}>&#x1F44D;</p> */}
-                  {/* <p style={{fontSize: '14px'}}>&#x{message.reaction[0].emoji.unified};</p> */}
-                  <Emoji text={message.reaction[0].emoji.unified} />
+                  {mappedEmojis}
                 </Card>
               )}
             </div>
@@ -217,7 +224,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openDialog }) => {
               <MenuItem
                 onClick={() => {
                   handleClose()
-                  openDialog(message)
+                  openEmojiPickerDialog(message)
                 }}
               >
                 React

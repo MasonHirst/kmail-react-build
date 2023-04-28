@@ -9,16 +9,18 @@ import { AuthContext } from '../../../context/AuthenticationContext'
 import { SocketContext } from '../../../context/SocketContext'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
-const { Button, Typography, Avatar, IconButton, SendIcon, Dialog } = muiStyles
+import Emoji from 'react-emoji-render'
+const { Button, Card, Typography, Avatar, IconButton, SendIcon, Dialog } =
+  muiStyles
 
 const ChatPage = () => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
-  const [messageLoading, setMessageLoading] = useState(false)
   const { darkTheme } = useContext(DarkModeContext)
   const { message, sendMessage, updatedMessage, setMessage, updatedReaction } =
     useContext(SocketContext)
   const { chat_id } = useParams()
+  const [messageLoading, setMessageLoading] = useState(false)
   const [otherUser, setOtherUser] = useState({})
   const [messageInput, setMessageInput] = useState('')
   const [messageToEdit, setMessageToEdit] = useState(null)
@@ -26,20 +28,31 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([])
   const [pageOffset, setPageOffset] = useState(0)
   const [messagesEnd, setMessagesEnd] = useState(false)
-  const conversationDivRef = useRef()
   const [showDownBtn, setShowDownBtn] = useState(false)
   const [showEmojiDialog, setShowEmojiDialog] = useState(false)
+  const [showEmojiReactions, setShowEmojiReactions] = useState(false)
   const [messageToReact, setMessageToReact] = useState({})
+  const [reactionToShow, setReactionToShow] = useState([])
+  const conversationDivRef = useRef()
   const limit = 50
 
-  function openDialog(messageObj) {
+  function openEmojiPickerDialog(messageObj) {
     setMessageToReact(messageObj)
     setShowEmojiDialog(true)
   }
 
+  function openEmojiReactionsDialog(reactions) {
+    setReactionToShow(reactions)
+    setShowEmojiReactions(true)
+  }
+
   function handleSubmitEmoji(emoji, user) {
     axios
-      .put('chats/messages/edit/reaction', { emoji, reactMessage: messageToReact, user })
+      .put('chats/messages/edit/reaction', {
+        emoji,
+        reactMessage: messageToReact,
+        user,
+      })
       .then(() => {})
       .catch(console.error)
   }
@@ -160,9 +173,19 @@ const ChatPage = () => {
   }, [chat_id, pageOffset])
 
   useEffect(() => {
-    if (!message || message.sender_id !== otherUser.id) return
+    if (!message) return
     setMessages([message, ...messages])
   }, [message])
+
+  useEffect(() => {
+    if (!updatedReaction.length) return
+    const itemIndex = messages.findIndex(
+      (item) => item.id === updatedReaction[0].reactMessage.id
+    )
+    const newArr = [...messages]
+    newArr[itemIndex].reaction = updatedReaction
+    setMessages(newArr)
+  }, [updatedReaction])
 
   function submitEditMessage(type) {
     setMessageInput('')
@@ -243,15 +266,39 @@ const ChatPage = () => {
         key={index}
         message={message}
         otherUser={otherUser}
-        openDialog={openDialog}
+        openEmojiPickerDialog={openEmojiPickerDialog}
+        openEmojiReactionsDialog={openEmojiReactionsDialog}
       />
+    )
+  })
+
+  const mappedReactions = reactionToShow.map((item, index) => {
+    return (
+      <div key={index} className='reaction-dialog-item'>
+        <div style={{display: 'flex', alignItems: 'center', gap: '10px',}}>
+          <Avatar
+            sx={{ width: 30, height: 30, color: 'white' }}
+            alt={item.user.username}
+            src={item.user.profile_pic}
+          />
+          <Typography>{item.user.username}</Typography>
+        </div>
+        <Emoji style={{fontSize: '25px'}}>{item.emoji.shortcodes}</Emoji>
+      </div>
     )
   })
 
   return (
     <div style={{ height: '100%', position: 'relative' }}>
       {showDownBtn && (
-        <Button onClick={handleScrollDown} className={darkTheme ? "to-bot-btn to-bot-btn-dark" : "to-bot-btn to-bot-btn-light"}>
+        <Button
+          onClick={handleScrollDown}
+          className={
+            darkTheme
+              ? 'to-bot-btn to-bot-btn-dark'
+              : 'to-bot-btn to-bot-btn-light'
+          }
+        >
           Back to bottom
         </Button>
       )}
@@ -357,6 +404,16 @@ const ChatPage = () => {
           }}
           theme={darkTheme ? 'dark' : 'light'}
         />
+        {/* <Button variant='text' color={darkTheme ? 'blueBtn' : 'primary'} onClick={() => setShowEmojiDialog(false)}>Close</Button> */}
+      </Dialog>
+      <Dialog
+        onClose={() => setShowEmojiReactions(false)}
+        open={showEmojiReactions}
+      >
+        <Card className='reactions-dialog-card'>
+          {mappedReactions}
+          <Button variant='text' color={darkTheme ? 'blueBtn' : 'primary'} sx={{textTransform: 'none', fontSize: '18px'}} onClick={() => setShowEmojiReactions(false)}>close</Button>
+        </Card>
       </Dialog>
     </div>
   )

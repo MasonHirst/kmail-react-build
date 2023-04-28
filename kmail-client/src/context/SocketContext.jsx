@@ -46,12 +46,11 @@ export const SocketProvider = ({ children }) => {
         if (!event?.data) return
         let messageData = JSON.parse(event.data)
         if (messageData.event_type === 'newMessage') {
-          setMessage(messageData)
+          setMessage(messageData.message)
         } else if (messageData.event_type === 'updatedMessage') {
-          setUpdatedMessage(messageData)
+          setUpdatedMessage(messageData.message)
         } else if (messageData.event_type === 'updatedReaction') {
-          console.log('-------------', messageData)
-          setUpdatedReaction(messageData.reactionObj)
+          setUpdatedReaction(messageData.message)
         }
       })
 
@@ -70,7 +69,7 @@ export const SocketProvider = ({ children }) => {
   }, [])
 
   useEffect(() => {
-    if (!message || message.sender_id !== user.id) return
+    if (!message || message.sender_id === user.id) return
     const sound = new Audio(notificationSound)
     sound.volume = 0.3
     sound.play()
