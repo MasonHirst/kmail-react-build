@@ -31,7 +31,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
     } else className += ' message-bubble-right'
     if (message.reaction.length) className += ' message-bubble-with-reaction'
     setMessageBubbleClass(className)
-  }, [darkTheme])
+  }, [darkTheme, message])
 
   function handleClick() {
     setShowDetails(!showDetails)
@@ -131,6 +131,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
     >
       {message.sender_id !== 'date marker' ? (
         <div
+          style={{alignItems: message.sender_id === user.id && 'flex-end'}}
           className={
             message.sender_id !== user.id
               ? 'message-bubble-container bubble-container-left'

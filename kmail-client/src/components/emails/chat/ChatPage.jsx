@@ -17,7 +17,7 @@ const ChatPage = () => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
-  const { message, sendMessage, updatedMessage, setMessage, updatedReaction } =
+  const { message, updatedMessage, updatedReaction } =
     useContext(SocketContext)
   const { chat_id } = useParams()
   const [messageLoading, setMessageLoading] = useState(false)
@@ -46,6 +46,10 @@ const ChatPage = () => {
     setShowEmojiReactions(true)
   }
 
+  useEffect(() => {
+    console.log('messages: ', messages)
+  }, [messages])
+  
   function handleSubmitEmoji(emoji, user) {
     axios
       .put('chats/messages/edit/reaction', {
@@ -259,7 +263,7 @@ const ChatPage = () => {
     )
   }
 
-  let mappedMessages = addDateMarkers(messages).map((message, index) => {
+  const mappedMessages = addDateMarkers(messages).map((message, index) => {
     return (
       <MessageCard
         handleEditMessage={handleEditMessage}
@@ -281,9 +285,9 @@ const ChatPage = () => {
             alt={item.user.username}
             src={item.user.profile_pic}
           />
-          <Typography>{item.user.username}</Typography>
+          <Typography variant='h6'>{item.user.username}</Typography>
         </div>
-        <Emoji style={{fontSize: '25px'}}>{item.emoji.shortcodes}</Emoji>
+        <Emoji style={{fontSize: '30px'}}>{item.emoji.shortcodes}</Emoji>
       </div>
     )
   })

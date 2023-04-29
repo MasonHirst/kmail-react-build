@@ -74,15 +74,10 @@
   z-index: 5 !important;
   border-radius: 17px !important;
   text-transform: none !important;
+  background-color: #1B66C8 !important;
+  color: white !important;
 }
-.to-bot-btn-dark {
-  background-color: rgb(131, 123, 123) !important;
-  color: black !important;
-}
-.to-bot-btn-light {
-  background-color: rgb(62, 82, 199) !important;
-  color: white!important;
-}
+
 
 .chat-preview-card {
   padding: 15px !important;
@@ -221,13 +216,13 @@
 .message-bubble-container {
   display: flex !important;
   gap: 10px !important;
-}
-.bubble-container-right {
   flex-direction: column;
+}
+/* .bubble-container-right {
   align-items: flex-end;
-}
+} */
 .bubble-container-left {
-  flex-direction: column;
+
 }
 
 .message-options-btn {

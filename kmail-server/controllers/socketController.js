@@ -4,23 +4,16 @@ const { verifyAccessToken } = require('./authController')
 
 const connections = {}
 function sendMessageToClient(recipientId, event_type, message) {
-  if (Array.isArray(recipientId)) {
-    for (let i = 0; i < recipientId.length; i++) {
-      const client = connections[recipientId[i]]
-      if (!client) {
-        console.log(`client ${recipientId[i]} person not online`)
-      } else {
-        const body = JSON.stringify({ event_type, message })
-        client.send(body)
-      }
-    }
-  } else {
-    const client = connections[recipientId]
+  let array = Array.isArray(recipientId) ? [...recipientId] : [recipientId]
+
+  for (let i = 0; i < array.length; i++) {
+    const client = connections[array[i]]
     if (!client) {
-      console.log(`client ${recipientId} not online`)
-      return
+      // console.log(`client ${array[i]} person not online`)
+    } else {
+      const body = JSON.stringify({ event_type, message })
+      client.send(body)
     }
-    client.send(message)
   }
 }
 
