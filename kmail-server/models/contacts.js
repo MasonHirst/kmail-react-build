@@ -7,6 +7,7 @@ const Contact = db.define('contact', {
     defaultValue: Sequelize.UUIDV4,
     primaryKey: true,
     allowNull: false,
+    unique: true,
   },
   favorited: {
     type: DataTypes.BOOLEAN,

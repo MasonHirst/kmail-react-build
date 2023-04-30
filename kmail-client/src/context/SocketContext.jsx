@@ -49,7 +49,7 @@ export const SocketProvider = ({ children }) => {
           setMessage(messageData.message)
         } else if (messageData.event_type === 'updatedMessage') {
           setUpdatedMessage(messageData.message)
-        } else if (messageData.event_type === 'updatedReaction') {
+        } else if (messageData.event_type === 'newReaction') {
           setUpdatedReaction(messageData.message)
         }
       })

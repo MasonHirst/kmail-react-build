@@ -29,7 +29,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
       className += ' message-bubble-left'
       if (!darkTheme) className += ' message-bubble-left-light'
     } else className += ' message-bubble-right'
-    if (message.reaction.length) className += ' message-bubble-with-reaction'
+    if (message.reactions.length) className += ' message-bubble-with-reaction'
     setMessageBubbleClass(className)
   }, [darkTheme, message])
 
@@ -103,7 +103,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
   }
 
   const emojiArray = []
-  message.reaction.map((emoji) => {
+  message.reactions.map((emoji) => {
     if (!emojiArray.length) emojiArray.push({emoji, count: 0})
     for (let i = 0; i < emojiArray.length; i++) {
       if (emojiArray[i].emoji.emoji.shortcodes === emoji.emoji.shortcodes) {
@@ -154,7 +154,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
                   height: 46,
                   color: 'white',
                   marginRight: '5px',
-                  marginBottom: message.reaction.length ? '12px' : '0',
+                  marginBottom: message.reactions.length ? '12px' : '0',
                 }}
                 alt={otherUser.username}
                 src={otherUser.profile_pic}
@@ -176,9 +176,9 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
                   </p>
                 )}
               </div>
-              {!!message.reaction.length && (
+              {!!message.reactions.length && (
                 <Card
-                onClick={() => openEmojiReactionsDialog(message.reaction)}
+                onClick={() => openEmojiReactionsDialog(message.reactions)}
                 className={
                     darkTheme
                       ? 'reactions-card reactions-card-dark'
