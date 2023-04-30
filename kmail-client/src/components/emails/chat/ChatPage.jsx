@@ -45,36 +45,40 @@ const ChatPage = () => {
     setReactionToShow(reactions)
     setShowEmojiReactions(true)
   }
-
-  useEffect(() => {
-    console.log('messages: ', messages)
-  }, [messages])
   
-  function handleSubmitEmoji(emoji, user) {
+  function handleSubmitEmoji(emoji) {
     axios
       .put('chats/messages/edit/reaction', {
         emoji,
         reactMessage: messageToReact,
-        user,
+        protocall: 'newReaction'
       })
-      .then(() => {})
+      .then(({ data }) => {
+      })
       .catch(console.error)
   }
 
   useEffect(() => {
-    if (!updatedReaction.length) return
-    const newArr = [...messages]
-    for (let i = 0; i < updatedReaction.length; i++) {
-      const messageId = updatedReaction[i].reactMessage.id
-      const react = updatedReaction[i].reactMessage.reaction
-      for (let j = 0; j < newArr.length; j++) {
-        if (messageId === newArr[j].id) {
-          newArr[j].reaction = react
-          break
+    // each message in the messages array has a reaction array. I want to add the updated reaction to the message that has the same id as the updated reaction, unless there is already a reaction with the same user.id, in which case I want to remove that reaction from the message and add the updated reaction to the message
+    if (!updatedReaction) return
+    const newArray = messages.map((obj) => {
+      if (obj.id === updatedReaction.messageId) {
+        const reactionIndex = obj.reactions.findIndex(
+          (reaction) => reaction.user.id === updatedReaction.user.id
+        )
+        if (reactionIndex === -1) {
+          obj.reactions.push(updatedReaction)
+        } else {
+          obj.reactions.splice(reactionIndex, 1)
+          obj.reactions.push(updatedReaction)
         }
+        return obj
+      } else {
+        return obj
       }
-    }
-    setMessages(newArr)
+    })
+    setMessages(newArray)
+
   }, [updatedReaction])
 
   useEffect(() => {
@@ -154,6 +158,7 @@ const ChatPage = () => {
     axios
       .get(`chat/${chat_id}/messages/${pageOffset}/${limit}`)
       .then(({ data }) => {
+        // console.log('DATA: ', data)
         setTimeout(() => {
           setIsLightLoading(false)
           if (data.length < 50) setMessagesEnd(true)
@@ -161,7 +166,7 @@ const ChatPage = () => {
             setMessagesEnd(true)
             return
           }
-          if (messages.length && data[0].chat_id !== messages[0].chat_id) {
+          if (messages.length && data[0].chatId !== messages[0].chatId) {
             setMessages(data)
           } else {
             setMessages([...messages, ...data])
@@ -235,7 +240,7 @@ const ChatPage = () => {
         markedMessages.push({
           sender_id: 'date marker',
           createdAt: currentMessage.createdAt,
-          reaction: [],
+          reactions: [],
         })
       }
       // If this message and the next message are on different days, add a date marker for the current message's createdAt date
@@ -246,7 +251,7 @@ const ChatPage = () => {
         markedMessages.push({
           sender_id: 'date marker',
           createdAt: currentMessage.createdAt,
-          reaction: [],
+          reactions: [],
         })
       }
       markedMessages.push(currentMessage)
@@ -403,7 +408,7 @@ const ChatPage = () => {
           data={data}
           autoFocus
           onEmojiSelect={(event) => {
-            handleSubmitEmoji(event, user)
+            handleSubmitEmoji(event)
             setShowEmojiDialog(false)
           }}
           theme={darkTheme ? 'dark' : 'light'}

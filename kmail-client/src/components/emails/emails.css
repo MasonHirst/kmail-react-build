@@ -40,9 +40,9 @@
   align-items: center;
   border-radius: 25px !important;
 }
-.reactions-card-light {
+/* .reactions-card-light {
 
-}
+} */
 .reactions-card-light:hover {
   background-color: #e3d7d7 !important;
   cursor: pointer;
@@ -217,12 +217,6 @@
   display: flex !important;
   gap: 10px !important;
   flex-direction: column;
-}
-/* .bubble-container-right {
-  align-items: flex-end;
-} */
-.bubble-container-left {
-
 }
 
 .message-options-btn {

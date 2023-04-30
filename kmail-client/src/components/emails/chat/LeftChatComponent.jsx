@@ -23,7 +23,7 @@ const LeftChatComponent = () => {
   useEffect(() => {
     if (!message) return
     const newArr = [...conversations]
-    const index = newArr.findIndex((item) => item.chat.id === message.chat_id)
+    const index = newArr.findIndex((item) => item.chat.id === message.chatId)
     const obj = newArr[index]
     obj.latest_message = message
     newArr.splice(index, 1)

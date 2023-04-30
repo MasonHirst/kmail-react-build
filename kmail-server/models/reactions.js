@@ -1,7 +1,7 @@
 const db = require('../util/dbConfig')
 const { DataTypes, Sequelize } = require('sequelize')
 
-const Chat = db.define('chat', {
+const Reactions = db.define('reaction', {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,
@@ -9,9 +9,9 @@ const Chat = db.define('chat', {
     allowNull: false,
     unique: true,
   },
-  last_message: {
-    type: DataTypes.DATE
-  }
+  emoji: {
+    type: DataTypes.JSON,
+  },
 })
 
-module.exports = Chat
+module.exports = Reactions

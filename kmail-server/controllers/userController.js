@@ -2,9 +2,10 @@ const User = require('../models/users')
 const { sendMessageToClient } = require('./socketController')
 const Message = require('../models/messages')
 const Chat = require('../models/chats')
+const Reaction = require('../models/reactions')
 require('dotenv').config()
 const { Op } = require('sequelize')
-const { Sequelize, sequelize } = require('sequelize')
+const { Sequelize } = require('sequelize')
 
 module.exports = {
   updateDarkMode: async (req, res) => {
@@ -113,7 +114,7 @@ module.exports = {
       let loopedConversations = []
       for (i = 0; i < conversations.length; i++) {
         let hasMessage = await Message.findOne({
-          where: { chat_id: conversations[i].id },
+          where: { chatId: conversations[i].id },
           order: [['createdAt', 'DESC']],
         })
         if (hasMessage) {
@@ -155,7 +156,7 @@ module.exports = {
     const { id } = req.params
     try {
       const message = await Message.findOne({
-        where: { chat_id: id },
+        where: { chatId: id },
         order: [['createdAt', 'DESC']],
       })
       res.send(message)
@@ -169,11 +170,25 @@ module.exports = {
     const { id, offset, limit } = req.params
     try {
       const messages = await Message.findAll({
-        where: { chat_id: id },
+        where: { chatId: id },
         order: [['createdAt', 'DESC']],
-        limit: limit, // load only 'limit' number of messages
+        limit: limit,
         offset: offset * limit,
+        include: [
+          {
+            model: Reaction,
+            as: 'reactions',
+            required: false,
+            include: [
+              {
+                model: User,
+                as: 'user',
+              },
+            ],
+          },
+        ],
       })
+
       res.send(messages)
     } catch (err) {
       console.error(err)
@@ -184,21 +199,29 @@ module.exports = {
   createMessage: async (req, res) => {
     const { userId, text, recipient, chat } = req.body
     try {
-      let message = await Message.create({
+      const message = await Message.create({
         text,
         edited: false,
-        reaction: [],
         sender_id: userId,
         recipient_id: recipient,
-        chat_id: chat,
+        chatId: chat,
         recipient_read: false,
         sender_deleted: false,
         recipient_deleted: false,
       })
+      await message.reload({
+        include: [
+          {
+            model: Reaction,
+            as: 'reactions',
+          },
+        ],
+      })
       if (message) {
         console.log('recipients: ', message.recipient_id, message.sender_id)
         sendMessageToClient(
-          [message.recipient_id, message.sender_id], 'newMessage',
+          [message.recipient_id, message.sender_id],
+          'newMessage',
           message.dataValues
         )
         let updateChat = await Chat.update(
@@ -214,24 +237,19 @@ module.exports = {
   },
 
   editMessage: async (req, res) => {
-    const { event, editorId, recipient_id, text, messageId } = req.body
+    const { editorId, recipient_id, text, messageId } = req.body
     try {
-      if (event === 'editMessage') {
-        const updatedText = await Message.update(
-          { text, edited: true },
-          { where: { id: messageId } }
-        )
-        const body = {
-          messageId,
-          text,
-          id: messageId,
-        }
-        sendMessageToClient([editorId, recipient_id], 'updatedMessage', body)
-        return res.send(updatedText)
-      } else if (event === 'newReaction') {
-        res.send('function needs finishing')
+      const updatedText = await Message.update(
+        { text, edited: true },
+        { where: { id: messageId } }
+      )
+      const body = {
+        messageId,
+        text,
+        id: messageId,
       }
-      res.send('unknown protocall request')
+      sendMessageToClient([editorId, recipient_id], 'updatedMessage', body)
+      res.send(updatedText)
     } catch (err) {
       console.error(err)
       res.status(403).send(err)
@@ -239,22 +257,52 @@ module.exports = {
   },
 
   editReaction: async (req, res) => {
-    const { emoji, reactMessage, user } = req.body
+    const { emoji, reactMessage, userId } = req.body
     try {
-      const checkArray = reactMessage.reaction.filter(
-        (item) => item.user.id !== user.id
-      )
-      const reactionObj = [...checkArray, { emoji, user, reactMessage }]
-      
-      sendMessageToClient(
-        [reactMessage.sender_id, reactMessage.recipient_id], 'updatedReaction',
-        reactionObj
-      )
-      const updatedReaction = await Message.update(
-        { reaction: reactionObj },
-        { where: { id: reactMessage.id } }
-      )
-      res.send(updatedReaction)
+      // I need to determine if the user has already reacted to this message, if so, I need to update the reaction instead of creating a new one
+      const reaction = await Reaction.findOne({
+        where: {
+          messageId: reactMessage.id,
+          userId,
+        },
+      })
+      if (reaction) {
+        const updatedReaction = await Reaction.update(
+          { emoji },
+          { where: { id: reaction.id }, returning: true, plain: true }
+        )
+        await updatedReaction[1].reload({
+          include: [{ model: User, as: 'user' }],
+        })
+        sendMessageToClient(
+          [reactMessage.sender_id, reactMessage.recipient_id],
+          'newReaction',
+          updatedReaction[1]
+        )
+        res.send(updatedReaction[1])
+      } else {
+        const newReaction = await Reaction.create(
+          {
+            emoji,
+            messageId: reactMessage.id,
+            userId,
+          }
+          // {
+          //   include: [{ model: User, as: 'user' }],
+          // }
+        )
+
+        await newReaction.reload({
+          include: [{ model: User, as: 'user' }],
+        })
+        delete newReaction.user.dataValues.hashed_pass
+        sendMessageToClient(
+          [reactMessage.sender_id, reactMessage.recipient_id],
+          'newReaction',
+          newReaction
+        )
+        res.send(newReaction)
+      }
     } catch (err) {
       console.error(err)
       res.status(403).send(err)
