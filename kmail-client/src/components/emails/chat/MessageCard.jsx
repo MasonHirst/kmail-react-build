@@ -15,23 +15,25 @@ const {
   Menu,
 } = muiStyles
 
-const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDialog, openEmojiReactionsDialog }) => {
+const MessageCard = ({
+  message,
+  otherUser,
+  handleEditMessage,
+  openEmojiPickerDialog,
+  openEmojiReactionsDialog,
+}) => {
   const { darkTheme } = useContext(DarkModeContext)
   const [showDetails, setShowDetails] = useState(false)
   const { user } = useContext(AuthContext)
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
-  const [messageBubbleClass, setMessageBubbleClass] = useState('message-bubble')
 
-  useEffect(() => {
-    let className = 'message-bubble'
-    if (message.sender_id !== user.id) {
-      className += ' message-bubble-left'
-      if (!darkTheme) className += ' message-bubble-left-light'
-    } else className += ' message-bubble-right'
-    if (message.reactions.length) className += ' message-bubble-with-reaction'
-    setMessageBubbleClass(className)
-  }, [darkTheme, message])
+  let bubbleClass = 'message-bubble'
+  if (message.sender_id !== user.id) {
+    bubbleClass += ' message-bubble-left'
+    if (!darkTheme) bubbleClass += ' message-bubble-left-light'
+  } else bubbleClass += ' message-bubble-right'
+  if (message.reactions.length) bubbleClass += ' message-bubble-with-reaction'
 
   function handleClick() {
     setShowDetails(!showDetails)
@@ -104,18 +106,33 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
 
   const emojiArray = []
   message.reactions.map((emoji) => {
-    if (!emojiArray.length) emojiArray.push({emoji, count: 0})
+    if (!emojiArray.length) emojiArray.push({ emoji, count: 0 })
     for (let i = 0; i < emojiArray.length; i++) {
       if (emojiArray[i].emoji.emoji.shortcodes === emoji.emoji.shortcodes) {
         emojiArray[i].count++
       } else {
-        emojiArray.push({emoji, count: 0})
+        emojiArray.push({ emoji, count: 0 })
       }
     }
   })
-  
+
   const mappedEmojis = emojiArray.map((emoji, index) => {
-    return <Emoji key={index}>{emoji.emoji.emoji.shortcodes} {emoji.count > 1 && <span style={{fontSize: '13px', position: 'relative', margin: '0 3px 0 2px',}}>{emoji.count}</span>}</Emoji>
+    return (
+      <Emoji key={index}>
+        {emoji.emoji.emoji.shortcodes}{' '}
+        {emoji.count > 1 && (
+          <span
+            style={{
+              fontSize: '13px',
+              position: 'relative',
+              margin: '0 3px 0 2px',
+            }}
+          >
+            {emoji.count}
+          </span>
+        )}
+      </Emoji>
+    )
   })
 
   return (
@@ -131,7 +148,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
     >
       {message.sender_id !== 'date marker' ? (
         <div
-          style={{alignItems: message.sender_id === user.id && 'flex-end'}}
+          style={{ alignItems: message.sender_id === user.id && 'flex-end' }}
           className={
             message.sender_id !== user.id
               ? 'message-bubble-container bubble-container-left'
@@ -160,7 +177,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
                 src={otherUser.profile_pic}
               />
             )}
-            <div className={messageBubbleClass}>
+            <div className={bubbleClass}>
               <div>
                 {message.text}{' '}
                 {message.edited && (
@@ -178,8 +195,8 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
               </div>
               {!!message.reactions.length && (
                 <Card
-                onClick={() => openEmojiReactionsDialog(message.reactions)}
-                className={
+                  onClick={() => openEmojiReactionsDialog(message.reactions)}
+                  className={
                     darkTheme
                       ? 'reactions-card reactions-card-dark'
                       : 'reactions-card reactions-card-light'

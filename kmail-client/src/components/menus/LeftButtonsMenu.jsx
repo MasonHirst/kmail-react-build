@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import muiStyles from '../../styles/muiStyles'
 import { useNavigate } from 'react-router-dom'
+import { SocketContext } from '../../context/SocketContext'
 import './menus.css'
 import LeftMenuLabelCard from './LeftMenuLabelCard'
 const {
@@ -23,7 +24,7 @@ const {
   IconButton,
   Typography,
   AddIcon,
-  MarkUnreadChatAltOutlinedIcon,
+  Badge,
   ChatOutlinedIcon,
 } = muiStyles
 
@@ -31,6 +32,7 @@ const LeftButtonsMenu = () => {
   const navigate = useNavigate()
   const [selectedIndex, setSelectedIndex] = React.useState(0)
   const [showMore, setShowMore] = useState(true)
+  const { hideChatsNotifications } = useContext(SocketContext)
 
   const handleListItemClick = (event, index) => {
     setSelectedIndex(index)
@@ -65,7 +67,7 @@ const LeftButtonsMenu = () => {
           <ListItemIcon>
             <InboxIcon />
           </ListItemIcon>
-          <ListItemText className='text' primary="Inbox" />
+          <ListItemText className="text" primary="Inbox" />
         </ListItemButton>
 
         <ListItemButton
@@ -76,9 +78,24 @@ const LeftButtonsMenu = () => {
           }}
         >
           <ListItemIcon>
-            <ChatOutlinedIcon />
+            <Badge
+              color="error"
+              variant="dot"
+              overlap="circular"
+              invisible={hideChatsNotifications}
+            >
+              <ChatOutlinedIcon />
+            </Badge>
           </ListItemIcon>
-          <ListItemText className='text' primary="Chats" />
+          <Typography
+            className="text"
+            sx={!hideChatsNotifications ? {
+              fontWeight: 'bold',
+              fontSize: '15px !important',
+            } : {}}
+          >
+            Chats
+          </Typography>
         </ListItemButton>
 
         <ListItemButton
@@ -88,7 +105,7 @@ const LeftButtonsMenu = () => {
           <ListItemIcon>
             <StarBorderIcon />
           </ListItemIcon>
-          <ListItemText className='text' primary="Starred" />
+          <ListItemText className="text" primary="Starred" />
         </ListItemButton>
         <ListItemButton
           selected={selectedIndex === 3}
@@ -97,7 +114,7 @@ const LeftButtonsMenu = () => {
           <ListItemIcon>
             <AccessTimeIcon />
           </ListItemIcon>
-          <ListItemText className='text' primary="Snoozed" />
+          <ListItemText className="text" primary="Snoozed" />
         </ListItemButton>
 
         <ListItemButton
@@ -107,7 +124,7 @@ const LeftButtonsMenu = () => {
           <ListItemIcon>
             <SendIcon />
           </ListItemIcon>
-          <ListItemText className='text' primary="Sent" />
+          <ListItemText className="text" primary="Sent" />
         </ListItemButton>
 
         <ListItemButton
@@ -117,17 +134,14 @@ const LeftButtonsMenu = () => {
           <ListItemIcon>
             <DraftsIcon />
           </ListItemIcon>
-          <ListItemText className='text' primary="Drafts" />
+          <ListItemText className="text" primary="Drafts" />
         </ListItemButton>
 
         <ListItemButton onClick={() => setShowMore(!showMore)}>
           <ListItemIcon>
             {showMore ? <ExpandMoreIcon /> : <ExpandLessIcon />}
           </ListItemIcon>
-          <ListItemText
-            primary={showMore ? 'More' : 'Less'}
-            className='text'
-          />
+          <ListItemText primary={showMore ? 'More' : 'Less'} className="text" />
         </ListItemButton>
 
         {!showMore ? (
@@ -139,7 +153,7 @@ const LeftButtonsMenu = () => {
               <ListItemIcon>
                 <ScheduleSendIcon />
               </ListItemIcon>
-              <ListItemText className='text' primary="Scheduled" />
+              <ListItemText className="text" primary="Scheduled" />
             </ListItemButton>
 
             <ListItemButton
@@ -149,7 +163,7 @@ const LeftButtonsMenu = () => {
               <ListItemIcon>
                 <MessageIcon />
               </ListItemIcon>
-              <ListItemText className='text' primary="Chats" />
+              <ListItemText className="text" primary="Chats" />
             </ListItemButton>
 
             <ListItemButton
@@ -159,7 +173,7 @@ const LeftButtonsMenu = () => {
               <ListItemIcon>
                 <ReportGmailerrorredIcon />
               </ListItemIcon>
-              <ListItemText className='text' primary="Spam" />
+              <ListItemText className="text" primary="Spam" />
             </ListItemButton>
 
             <ListItemButton
@@ -169,7 +183,7 @@ const LeftButtonsMenu = () => {
               <ListItemIcon>
                 <DeleteOutlineIcon />
               </ListItemIcon>
-              <ListItemText className='text' primary="Trash" />
+              <ListItemText className="text" primary="Trash" />
             </ListItemButton>
           </div>
         ) : (

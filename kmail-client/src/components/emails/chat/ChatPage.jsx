@@ -10,6 +10,10 @@ import { SocketContext } from '../../../context/SocketContext'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import Emoji from 'react-emoji-render'
+import boingSound from '../../../assets/boing-tone.mp3'
+import plingSound from '../../../assets/pling-tone.mp3'
+import bubblingSound from '../../../assets/bubbling-tone.mp3'
+import popSound from '../../../assets/pop-tone.wav'
 const { Button, Card, Typography, Avatar, IconButton, SendIcon, Dialog } =
   muiStyles
 
@@ -17,8 +21,13 @@ const ChatPage = () => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
-  const { message, updatedMessage, updatedReaction } =
-    useContext(SocketContext)
+  const {
+    message,
+    updatedMessage,
+    updatedReaction,
+    hideChatsNotifications,
+    setHideChatsNotifications,
+  } = useContext(SocketContext)
   const { chat_id } = useParams()
   const [messageLoading, setMessageLoading] = useState(false)
   const [otherUser, setOtherUser] = useState({})
@@ -36,6 +45,57 @@ const ChatPage = () => {
   const conversationDivRef = useRef()
   const limit = 50
 
+  useEffect(() => {
+    const unreadMessages = messages.some(
+      (msg) => !msg.recipient_read && msg.recipient_id === user.id
+    )
+    console.log('unread messages: ', unreadMessages)
+    if (!message || message.chatId !== chat_id) return
+    setMessages([message, ...messages])
+  }, [message])
+
+  // useEffect(() => {
+  //   // loop through messages and return true if there are any messages with a recipient_read value of false, and a recipient_id value that matches user.id
+  //   const unreadMessages = messages.some(
+  //     (msg) => !msg.recipient_read && msg.recipient_id === user.id
+  //   )
+  //   if (!unreadMessages) return
+  //   console.log('unread messages: ', unreadMessages)
+  //   const updatedMessages = messages.map((msg) => {
+  //     if (!msg.recipient_read && msg.recipient_id === user.id) {
+  //       console.log('before msg: ', msg)
+  //       msg.recipient_read = true
+  //       console.log('after msg: ', msg)
+  //     }
+  //     return msg
+  //   })
+  //   setMessages(updatedMessages)
+  //   setHideChatsNotifications(true)
+  //   axios
+  //     .put(`messages/mark/read/${chat_id}`)
+  //     .then(({ data }) => {
+  //       // loop through the messages array and mark any messages with a recipient_read value of false, and a recipient_id value that matches user.id, as read
+  //     })
+  //     .catch(console.error)
+  // }, [message, chat_id])
+
+  function playSound(soundPath) {
+    return (vol) => {
+      const sound = new Audio(soundPath)
+      sound.volume = vol || 0.3
+      sound.play()
+    }
+  }
+  const playBoing = playSound(boingSound)
+  const playPling = playSound(plingSound)
+  const playBubbling = playSound(bubblingSound)
+  const playPop = playSound(popSound)
+
+  useEffect(() => {
+    if (!showEmojiDialog) return
+    playBubbling()
+  }, [showEmojiDialog])
+
   function openEmojiPickerDialog(messageObj) {
     setMessageToReact(messageObj)
     setShowEmojiDialog(true)
@@ -45,15 +105,16 @@ const ChatPage = () => {
     setReactionToShow(reactions)
     setShowEmojiReactions(true)
   }
-  
+
   function handleSubmitEmoji(emoji) {
     axios
       .put('chats/messages/edit/reaction', {
         emoji,
         reactMessage: messageToReact,
-        protocall: 'newReaction'
+        protocall: 'newReaction',
       })
       .then(({ data }) => {
+        playPop()
       })
       .catch(console.error)
   }
@@ -78,7 +139,6 @@ const ChatPage = () => {
       }
     })
     setMessages(newArray)
-
   }, [updatedReaction])
 
   useEffect(() => {
@@ -117,9 +177,9 @@ const ChatPage = () => {
 
   function handleScroll() {
     const div = conversationDivRef.current
-    if (div.scrollTop < -500 && !showDownBtn) {
+    if (div.scrollTop < -700 && !showDownBtn) {
       setShowDownBtn(true)
-    } else if (div.scrollTop > -500 && showDownBtn) {
+    } else if (div.scrollTop > -700 && showDownBtn) {
       setShowDownBtn(false)
     }
     if (messagesEnd) return
@@ -182,11 +242,6 @@ const ChatPage = () => {
   }, [chat_id, pageOffset])
 
   useEffect(() => {
-    if (!message) return
-    setMessages([message, ...messages])
-  }, [message])
-
-  useEffect(() => {
     if (!updatedReaction.length) return
     const itemIndex = messages.findIndex(
       (item) => item.id === updatedReaction[0].reactMessage.id
@@ -212,9 +267,10 @@ const ChatPage = () => {
       .catch(console.error)
   }
 
-  function handleSubmit(event) {
+  function handleSubmit() {
     setMessageInput('')
     setMessageLoading(true)
+    playPling(0.5)
     axios
       .post('chats/messages/create', {
         text: messageInput,
@@ -283,16 +339,16 @@ const ChatPage = () => {
 
   const mappedReactions = reactionToShow.map((item, index) => {
     return (
-      <div key={index} className='reaction-dialog-item'>
-        <div style={{display: 'flex', alignItems: 'center', gap: '10px',}}>
+      <div key={index} className="reaction-dialog-item">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Avatar
             sx={{ width: 30, height: 30, color: 'white' }}
             alt={item.user.username}
             src={item.user.profile_pic}
           />
-          <Typography variant='h6'>{item.user.username}</Typography>
+          <Typography variant="h6">{item.user.username}</Typography>
         </div>
-        <Emoji style={{fontSize: '30px'}}>{item.emoji.shortcodes}</Emoji>
+        <Emoji style={{ fontSize: '30px' }}>{item.emoji.shortcodes}</Emoji>
       </div>
     )
   })
@@ -403,7 +459,13 @@ const ChatPage = () => {
           <SendIcon />
         </IconButton>
       </form>
-      <Dialog onClose={() => setShowEmojiDialog(false)} open={showEmojiDialog}>
+      <Dialog
+        onClose={() => setShowEmojiDialog(false)}
+        PaperProps={{
+          style: { borderRadius: 15 },
+        }}
+        open={showEmojiDialog}
+      >
         <Picker
           data={data}
           autoFocus
@@ -418,10 +480,20 @@ const ChatPage = () => {
       <Dialog
         onClose={() => setShowEmojiReactions(false)}
         open={showEmojiReactions}
+        PaperProps={{
+          style: { borderRadius: 15 },
+        }}
       >
-        <Card className='reactions-dialog-card'>
+        <Card className="reactions-dialog-card">
           {mappedReactions}
-          <Button variant='text' color={darkTheme ? 'blueBtn' : 'primary'} sx={{textTransform: 'none', fontSize: '18px'}} onClick={() => setShowEmojiReactions(false)}>close</Button>
+          <Button
+            variant="text"
+            color={darkTheme ? 'blueBtn' : 'primary'}
+            sx={{ textTransform: 'none', fontSize: '18px' }}
+            onClick={() => setShowEmojiReactions(false)}
+          >
+            close
+          </Button>
         </Card>
       </Dialog>
     </div>

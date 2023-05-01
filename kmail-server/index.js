@@ -57,6 +57,7 @@ const {
   getAllMessages,
   editMessage,
   editReaction,
+  markMessagesRead,
 } = require('./controllers/userController')
 // const { getLabels, getTestInfo } = require('./emailFetch')
 const { getTestInfo } = require('./controllers/emailApiController')
@@ -82,6 +83,7 @@ app.post('/chats/messages/create', validateToken, createMessage)
 app.get('/chat/:id/messages/:offset/:limit', validateToken, getAllMessages)
 app.put('/chats/messages/edit', validateToken, editMessage)
 app.put('/chats/messages/edit/reaction', validateToken, editReaction)
+app.put('/messages/mark/read/:chat_id', validateToken, markMessagesRead)
 
 //! Socket server
 const { startSocketServer } = require('./controllers/socketController')

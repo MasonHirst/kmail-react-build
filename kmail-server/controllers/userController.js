@@ -118,7 +118,6 @@ module.exports = {
           order: [['createdAt', 'DESC']],
         })
         if (hasMessage) {
-          // console.log('user1: ', conversations[i].user1)
           if (conversations[i].user1 === userId) {
             let otherUser = await User.findOne({
               where: { id: conversations[i].user2 },
@@ -218,7 +217,6 @@ module.exports = {
         ],
       })
       if (message) {
-        console.log('recipients: ', message.recipient_id, message.sender_id)
         sendMessageToClient(
           [message.recipient_id, message.sender_id],
           'newMessage',
@@ -308,19 +306,16 @@ module.exports = {
       res.status(403).send(err)
     }
   },
+
+  markMessagesRead: async (req, res) => {
+    const {chat_id} = req.params
+    const {userId} = req.body
+    try {
+      const readMessages = await Message.update({recipient_read: true}, {where: {chatId: chat_id, recipient_id: userId, recipient_read: false}})
+      console.log('readMessages: ', readMessages)
+    } catch (err) {
+      res.status(403).send(err)
+    }
+  },
 }
 
-// {
-//   text: '',
-//   edited: false,
-//   reaction: {emoji: ''},
-//   sender_id: userId,
-//   recipient_id: recipient,
-// }
-
-// try {
-//   res.send('you made it')
-// } catch (err) {
-//   console.log(err)
-//   res.status(403).send(err)
-// }

@@ -9,12 +9,27 @@ import muiStyles from '../../../styles/muiStyles'
 const { Button, IconButton, MoreVertOutlinedIcon, ChatBubbleOutlineOutlinedIcon, Typography } = muiStyles
 
 const LeftChatComponent = () => {
-  const location = useLocation();
-  const { setChatId, chatId } = useContext(AuthContext)
+  const {
+    message,
+    updatedMessage,
+    updatedReaction,
+    hideChatsNotifications,
+    setHideChatsNotifications,
+    conversations,
+    setConversations,
+  } = useContext(SocketContext)
+  const location = useLocation()
+  const { setChatId, chatId, user } = useContext(AuthContext)
   const navigate = useNavigate()
   const { darkTheme } = useContext(DarkModeContext)
-  const { message } = useContext(SocketContext)
-  const [conversations, setConversations] = useState([])
+
+  // loop through the conversations array and if any of the conversations have a latest_message with a recipient_read value of false and a sender_id that is not the user's id, then return true
+  useEffect(() => {
+    const unreadChat = conversations.some((conv) => {
+      return conv.latest_message.recipient_read === false && conv.latest_message.sender_id !== user.id
+    })
+    setHideChatsNotifications(!unreadChat)
+  }, [conversations])
   
   const mappedConversations = conversations.map((conv, index) => {
     return <ChatPreviewCard key={index} data={conv} />
@@ -39,12 +54,7 @@ const LeftChatComponent = () => {
       .catch(err => {
         console.error('ERROR IN LEFT CHAT COMPONENT: ', err)
       })
-
-      return () => {
-        // setChatId('')
-        // can't remember why this is here, but it messes up other functions
-      }
-  }, [chatId])
+  }, [chatId, hideChatsNotifications])
   
   return (
     <div className='left-chat-div'>
