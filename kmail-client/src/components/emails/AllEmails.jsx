@@ -12,7 +12,7 @@ const AllEmails = () => {
       sx={{
         marginLeft: { xs: 0, sm: 0, md: 0, lg: '15px' },
         minWidth: { xs: '200px', sm: '200px', md: '200px', lg: '700px' },
-        height: {xs: 'calc(100vh - 64px)', lg: 'calc(100vh - 80px)'},
+        height: {xs: 'calc(100vh - 45px)', sm: 'calc(100vh - 64px)', lg: 'calc(100vh - 80px)'},
         borderRadius: {xs: 0, lg: '20px'}
       }}
       className="emails-page-div-general"

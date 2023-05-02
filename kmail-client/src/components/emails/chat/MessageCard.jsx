@@ -141,7 +141,7 @@ const MessageCard = ({
         <Box
           sx={{
             alignItems: message.sender_id === user.id && 'flex-end',
-            maxWidth: '80%',
+            maxWidth: 'min(80%, 800px)',
           }}
           className={
             notUser
@@ -153,15 +153,15 @@ const MessageCard = ({
             sx={{
               display: 'flex',
               gap: '3px',
-              alignItems: 'center',
+              alignItems: 'flex-start',
               flexDirection: notUser ? 'row' : 'row-reverse',
             }}
           >
             {notUser && (
               <Avatar
                 sx={{
-                  width: 46,
-                  height: 46,
+                  width: {xs: 30, sm: 46},
+                  height: {xs: 30, sm: 46},
                   color: 'white',
                   marginRight: '5px',
                   marginBottom: message.reactions.length ? '12px' : '0',

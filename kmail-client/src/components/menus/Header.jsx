@@ -67,11 +67,11 @@ const Header = () => {
   }
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         backgroundcolor: 'transparent',
         width: '100vw',
-        height: '64px',
+        height: {xs: '45px', sm: '64px'},
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'flex-start',
@@ -174,7 +174,7 @@ const Header = () => {
           </div>
         </Box>
       </Box>
-    </div>
+    </Box>
   )
 }
 

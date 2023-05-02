@@ -3,7 +3,6 @@ import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { SocketContext } from '../../../context/SocketContext'
 import { AuthContext } from '../../../context/AuthenticationContext'
-import axios from 'axios'
 import ChatPreviewCard from './ChatPreviewCard'
 import muiStyles from '../../../styles/muiStyles'
 const { Button, IconButton, MoreVertOutlinedIcon, ChatBubbleOutlineOutlinedIcon, Typography, Box } = muiStyles
@@ -23,9 +22,8 @@ const LeftChatComponent = () => {
 
   // loop through the conversations array and if any of the conversations have a latest_message with a recipient_read value of false and a sender_id that is not the user's id, then return true
   
-  
   const mappedConversations = conversations.map((conv, index) => {
-    return <ChatPreviewCard key={index} data={conv} />
+    return <ChatPreviewCard  key={index} data={conv} />
   })
 
   useEffect(() => {

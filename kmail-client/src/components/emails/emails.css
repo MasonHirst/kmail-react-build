@@ -135,7 +135,6 @@
   border-bottom-right-radius: 20px;
 }
 .right-chat-header {
-  height: 90px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.42);
   display: flex;
   align-items: center;
@@ -403,3 +402,7 @@
   padding-left: 12px;
 }
 
+
+@media (max-width: 600px) {
+  .display-none {display: none !important;}
+}

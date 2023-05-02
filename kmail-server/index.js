@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
-// const path = require('path')
+const path = require('path')
 const db = require('./util/dbConfig')
 const seed = require('./util/seed')
 
@@ -14,6 +14,9 @@ const Chat = require('./models/chats')
 const Reaction = require('./models/reactions')
 
 //! Middleware
+const join = path.join(__dirname, '.', 'build')
+// console.log(join)
+app.use(express.static(join))
 app.use(express.json())
 app.use(cors())
 
@@ -85,15 +88,18 @@ app.put('/chats/messages/edit', validateToken, editMessage)
 app.put('/chats/messages/edit/reaction', validateToken, editReaction)
 app.put('/messages/mark/read/:chat_id', validateToken, markMessagesRead)
 
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '.', 'build', 'index.html'))
+})
+
 //! Socket server
 const { startSocketServer } = require('./controllers/socketController')
 startSocketServer()
 
 //! Server listen
 const { SERVER_PORT } = process.env
-db.sync()
-  .then(() => {
-    app.listen(SERVER_PORT, () =>
-      console.log(`SERVER RUNNING ON SERVER_PORT ${SERVER_PORT}`)
-    )
-  })
+db.sync().then(() => {
+  app.listen(SERVER_PORT, () =>
+    console.log(`SERVER RUNNING ON SERVER_PORT ${SERVER_PORT}`)
+  )
+})

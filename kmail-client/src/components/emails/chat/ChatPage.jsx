@@ -25,13 +25,14 @@ const {
   SentimentSatisfiedAltIcon,
   MenuIcon,
   Box,
+  ArrowBackOutlinedIcon,
 } = muiStyles
 
-const ChatPage = () => {
+const ChatPage = ({rightChatRef}) => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
-  const { message, updatedMessage, updatedReaction, getConversations } =
+  const { message, updatedMessage, updatedReaction, getConversations, toggleLeftOrRightChat } =
     useContext(SocketContext)
   const { chat_id } = useParams()
   const [messageLoading, setMessageLoading] = useState(false)
@@ -392,18 +393,21 @@ const ChatPage = () => {
           <ArrowCircleDownSharpIcon style={{ fontSize: 45 }} />
         </IconButton>
       )}
-      <Box className="right-chat-header" sx={{ paddingLeft: {sm: '10px', md: '25px'} }}>
+      <Box className="right-chat-header" sx={{ paddingLeft: {sm: '10px', md: '25px'}, height: {xs: '65px', sm: '90px'} }}>
         <IconButton
           sx={{
             padding: '12px',
+            height: 45,
+            width: 45,
             marginRight: '10px',
             display: { xs: 'block', sm: 'block', md: 'none' },
           }}
+          onClick={() => toggleLeftOrRightChat(rightChatRef.current)}
         >
-          <MenuIcon />
+          <ArrowBackOutlinedIcon />
         </IconButton>
         <Avatar
-          sx={{ width: 65, height: 65, color: 'white' }}
+          sx={{ width: {xs: 45, sm: 65}, height: {xs: 45, sm: 65}, color: 'white' }}
           alt={otherUser.username}
           src={otherUser.profile_pic}
         />

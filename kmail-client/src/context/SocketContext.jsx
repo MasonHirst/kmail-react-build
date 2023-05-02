@@ -23,6 +23,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState()
   const [hideChatsNotifications, setHideChatsNotifications] = useState(true)
   const [conversations, setConversations] = useState([])
+  const [showingLeftChat, setShowingLeftChat] = useState(true)
 
   console.success = function(message) {
     console.log("%c✅ " + message, "color: #04A57D; font-weight: bold;")
@@ -30,6 +31,24 @@ export const SocketProvider = ({ children }) => {
   
   console.warning = function(message) {
     console.log("%c⚠️ " + message, "color: yellow; font-weight: bold;")
+  }
+
+  let rightRef
+  let leftRef
+  function toggleLeftOrRightChat(ref) {
+    if (showingLeftChat) {
+      console.log('showLeftChat', ref)
+      rightRef = ref
+      rightRef.classList.add('display-none')
+      leftRef.classList.remove('display-none')
+      setShowingLeftChat(!showingLeftChat)
+    } else {
+      console.log('!showLeftChat', ref)
+      leftRef = ref
+      leftRef.classList.add('display-none')
+      rightRef.classList.remove('display-none')
+      setShowingLeftChat(!showingLeftChat)
+    }
   }
 
   function getConversations() {
@@ -110,6 +129,7 @@ export const SocketProvider = ({ children }) => {
         conversations,
         setConversations,
         getConversations,
+        toggleLeftOrRightChat,
       }}
     >
       {children}

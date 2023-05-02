@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useRef } from 'react'
 import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import NoChatPage from './NoChatPage'
@@ -9,13 +9,14 @@ const { Button, Box } = muiStyles
 
 const RightChatComponent = () => {
   const { darkTheme } = useContext(DarkModeContext)
+  const rightChatRef = useRef()
 
   return (
-    <Box className="right-chat-div">
+    <Box ref={rightChatRef} className="right-chat-div" >
       <Routes>
         <Route path="/" element={<NoChatPage />} />
         <Route path="new" element={<NewChatPage />} />
-        <Route path=":chat_id" element={<ChatPage />} />
+        <Route path=":chat_id" element={<ChatPage rightChatRef={rightChatRef} />} />
       </Routes>
     </Box>
   )
