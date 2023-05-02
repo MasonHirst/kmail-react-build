@@ -3,18 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import { SocketContext } from '../../../context/SocketContext'
 import { AuthContext } from '../../../context/AuthenticationContext'
 import muiStyles from '../../../styles/muiStyles'
-const { IconButton, Avatar, Typography, Button } = muiStyles
+const { IconButton, Avatar, Typography, Button, Box } = muiStyles
 
 const ChatPreviewCard = ({ data }) => {
   const { chatId, user } = useContext(AuthContext)
-  const {
-    message,
-    updatedMessage,
-    updatedReaction,
-    hideChatsNotifications,
-    setHideChatsNotifications,
-  } = useContext(SocketContext)
+  const { message, updatedMessage, updatedReaction } = useContext(SocketContext)
   const navigate = useNavigate()
+  const [isFocused, setIsFocused] = useState(false)
+
+  useEffect(() => {
+    if (chatId === data.latest_message.chatId && !isFocused) {
+      setIsFocused(true)
+    } else if (chatId !== data.latest_message.chatId && isFocused) {
+      setIsFocused(false)
+    }
+  }, [chatId])
 
   const unreadChat =
     data.latest_message.recipient_read === false &&
@@ -58,8 +61,23 @@ const ChatPreviewCard = ({ data }) => {
   }
 
   return (
-    <div onClick={handleClick} className="chat-preview-card">
-      <div style={{position: 'relative'}}>
+    <Box onClick={handleClick} className="chat-preview-card">
+      {isFocused && (
+        <Box
+          sx={{
+            position: 'absolute',
+            backgroundColor: '#1B66C8',
+            left: 0,
+            height: '80%',
+            width: 6,
+            borderTopRightRadius: 8,
+            borderBottomRightRadius: 8,
+            transition: 'all 0.2s ease-in-out',
+          }}
+        />
+      )}
+
+      <Box sx={{ position: 'relative' }}>
         <Avatar
           sx={{ width: 45, height: 45, color: 'white' }}
           alt={data.otherUser.username}
@@ -77,7 +95,7 @@ const ChatPreviewCard = ({ data }) => {
         >
           {data.otherUser.username}
         </Typography>
-      </div>
+      </Box>
       <Typography
         variant="subtitle2"
         sx={{
@@ -106,7 +124,7 @@ const ChatPreviewCard = ({ data }) => {
       >
         {formatDate(data.latest_message.createdAt)}
       </Typography>
-    </div>
+    </Box>
   )
 }
 

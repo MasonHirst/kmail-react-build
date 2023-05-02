@@ -13,10 +13,13 @@ const NewChatPage = () => {
   const [searchInput, setSearchInput] = useState('')
   const { darkTheme } = useContext(DarkModeContext)
   const { isLightLoading, setIsLightLoading } = useContext(AuthContext)
-
   const [contacts, setContacts] = useState([])
   const [otherUsers, setOtherUsers] = useState([])
   const [searchMessage, setSearchMessage] = useState('Search for a username')
+
+  useEffect(() => {
+    document.title = 'Kmail - new chat'
+  }, [])
 
   useEffect(() => {
     if (searchInput !== '') {

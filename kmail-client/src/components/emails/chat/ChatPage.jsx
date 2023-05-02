@@ -54,6 +54,14 @@ const ChatPage = ({rightChatRef}) => {
   const limit = 50
 
   useEffect(() => {
+    if (!otherUser) return
+    document.title = `Kmail - chat with ${otherUser.username}`
+    return () => {
+      document.title = 'Kmail - chats'
+    }
+  }, [, otherUser])
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         typeEmojisRef.current &&
@@ -248,10 +256,12 @@ const ChatPage = ({rightChatRef}) => {
 
   useEffect(() => {
     setIsLightLoading(true)
+    console.log('otherUser: ', otherUser.username)
     axios
       .get(`chat/${chat_id}/messages/${pageOffset}/${limit}`)
       .then(({ data }) => {
         setTimeout(() => {
+          console.log('data: ', data)
           setIsLightLoading(false)
           if (data.length < 50) setMessagesEnd(true)
           if (!data.length) {

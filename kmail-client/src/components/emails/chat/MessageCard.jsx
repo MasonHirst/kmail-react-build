@@ -36,7 +36,7 @@ const MessageCard = ({
     if (!darkTheme) bubbleClass += ' message-bubble-left-light'
   } else bubbleClass += ' message-bubble-right'
   if (message.reactions.length) bubbleClass += ' message-bubble-with-reaction'
-
+  
   function formatTime(time) {
     const date = new Date(time)
     var hours = date.getHours()
@@ -140,7 +140,7 @@ const MessageCard = ({
       {message.sender_id !== 'date marker' ? (
         <Box
           sx={{
-            alignItems: message.sender_id === user.id && 'flex-end',
+            alignItems: !notUser && 'flex-end',
             maxWidth: 'min(80%, 800px)',
           }}
           className={
@@ -172,7 +172,7 @@ const MessageCard = ({
             )}
             <Box
               className={bubbleClass}
-              sx={{ position: 'relative', }}
+              sx={{ position: 'relative', fontSize: '15px' }}
             >
               <IconButton
                 onClick={(event) => setAnchorEl(event.currentTarget)}
@@ -219,7 +219,7 @@ const MessageCard = ({
               onClose={() => setAnchorEl(null)}
               elevation={2}
             >
-              {message.sender_id === user.id && (
+              {!notUser && (
                 <MenuItem
                   onClick={() => {
                     setAnchorEl(null)
