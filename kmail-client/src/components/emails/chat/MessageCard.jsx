@@ -13,6 +13,7 @@ const {
   MoreVertIcon,
   MenuItem,
   Menu,
+  Box,
 } = muiStyles
 
 const MessageCard = ({
@@ -27,25 +28,14 @@ const MessageCard = ({
   const { user } = useContext(AuthContext)
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
+  const notUser = message.sender_id !== user.id
 
   let bubbleClass = 'message-bubble'
-  if (message.sender_id !== user.id) {
+  if (notUser) {
     bubbleClass += ' message-bubble-left'
     if (!darkTheme) bubbleClass += ' message-bubble-left-light'
   } else bubbleClass += ' message-bubble-right'
   if (message.reactions.length) bubbleClass += ' message-bubble-with-reaction'
-
-  function handleClick() {
-    setShowDetails(!showDetails)
-  }
-
-  function handleMoreOptions(event) {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
 
   function formatTime(time) {
     const date = new Date(time)
@@ -136,35 +126,38 @@ const MessageCard = ({
   })
 
   return (
-    <div
-      onClick={handleClick}
+    <Box
+      onClick={() => setShowDetails(!showDetails)}
+      sx={{}}
       className={
         message.sender_id !== 'date marker'
-          ? message.sender_id !== user.id
+          ? notUser
             ? 'message-bubble-btn message-left'
             : 'message-bubble-btn message-right'
           : 'date-marker-container'
       }
     >
       {message.sender_id !== 'date marker' ? (
-        <div
-          style={{ alignItems: message.sender_id === user.id && 'flex-end' }}
+        <Box
+          sx={{
+            alignItems: message.sender_id === user.id && 'flex-end',
+            maxWidth: '80%',
+          }}
           className={
-            message.sender_id !== user.id
+            notUser
               ? 'message-bubble-container bubble-container-left'
               : 'message-bubble-container bubble-container-right'
           }
         >
-          <div
-            style={{
+          <Box
+            sx={{
               display: 'flex',
               gap: '3px',
               alignItems: 'center',
-              flexDirection:
-                message.sender_id !== user.id ? 'row' : 'row-reverse',
+              flexDirection: notUser ? 'row' : 'row-reverse',
             }}
           >
-            {message.sender_id !== user.id && (
+            {notUser && (
               <Avatar
                 sx={{
                   width: 46,
@@ -177,7 +170,21 @@ const MessageCard = ({
                 src={otherUser.profile_pic}
               />
             )}
-            <div className={bubbleClass}>
+            <Box
+              className={bubbleClass}
+              sx={{ position: 'relative', }}
+            >
+              <IconButton
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+                className="message-options-btn"
+                sx={
+                  notUser
+                    ? { right: '-45px', display: { xs: 'none', sm: 'none' } }
+                    : { left: '-45px', display: { xs: 'none', sm: 'none' } }
+                }
+              >
+                <MoreVertIcon width={30} />
+              </IconButton>
               <div>
                 {message.text}{' '}
                 {message.edited && (
@@ -185,8 +192,7 @@ const MessageCard = ({
                     style={{
                       fontSize: 14,
                       opacity: 0.7,
-                      textAlign:
-                        message.sender_id !== user.id ? 'left' : 'right',
+                      textAlign: notUser ? 'left' : 'right',
                     }}
                   >
                     (edited)
@@ -205,33 +211,18 @@ const MessageCard = ({
                   {mappedEmojis}
                 </Card>
               )}
-            </div>
-            <IconButton
-              onClick={handleMoreOptions}
-              className="message-options-btn"
-              sx={{
-                padding: 'white',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '40px',
-                width: '40px',
-              }}
-            >
-              <MoreVertIcon width={30} />
-            </IconButton>
-
+            </Box>
             <Menu
               id="basic-menu"
               anchorEl={anchorEl}
               open={open}
-              onClose={handleClose}
+              onClose={() => setAnchorEl(null)}
               elevation={2}
             >
               {message.sender_id === user.id && (
                 <MenuItem
                   onClick={() => {
-                    handleClose()
+                    setAnchorEl(null)
                     handleEditMessage(message)
                   }}
                 >
@@ -241,20 +232,20 @@ const MessageCard = ({
 
               <MenuItem
                 onClick={() => {
-                  handleClose()
+                  setAnchorEl(null)
                   openEmojiPickerDialog(message)
                 }}
               >
                 React
               </MenuItem>
-              <MenuItem onClick={handleClose}>Delete</MenuItem>
+              <MenuItem onClick={() => setAnchorEl(null)}>Delete</MenuItem>
             </Menu>
-          </div>
+          </Box>
           {showDetails ? (
             <Typography
               variant="subtitle1"
               className={
-                message.sender_id !== user.id
+                notUser
                   ? 'message-details-text details-left'
                   : 'message-details-text details-right'
               }
@@ -264,7 +255,7 @@ const MessageCard = ({
           ) : (
             ''
           )}
-        </div>
+        </Box>
       ) : (
         <Typography sx={{ margin: '15px 0', fontSize: 14, opacity: 0.8 }}>
           {formatDate(message.createdAt) +
@@ -272,7 +263,7 @@ const MessageCard = ({
             formatTime(message.createdAt)}
         </Typography>
       )}
-    </div>
+    </Box>
   )
 }
 

@@ -50,7 +50,9 @@ const LeftButtonsMenu = () => {
   })
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 240, bgcolor: 'transparent' }}>
+    <Box sx={{ width: '100%', maxWidth: 240, bgcolor: 'transparent',
+      display: { xs: 'none', md: 'none', lg: 'block' },
+    }}>
       <List
         component="nav"
         aria-label="main mailbox folders"
@@ -61,7 +63,7 @@ const LeftButtonsMenu = () => {
           selected={selectedIndex === 0}
           onClick={(event) => {
             handleListItemClick(event, 0)
-            navigate('/')
+            navigate('/inbox')
           }}
         >
           <ListItemIcon>

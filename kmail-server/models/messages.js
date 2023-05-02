@@ -16,6 +16,7 @@ const Message = db.define('message', {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
+  type: { type: DataTypes.STRING },
   recipient_read: { type: DataTypes.BOOLEAN, },
   sender_deleted: { type: DataTypes.BOOLEAN, },
   recipient_deleted: { type: DataTypes.BOOLEAN, },

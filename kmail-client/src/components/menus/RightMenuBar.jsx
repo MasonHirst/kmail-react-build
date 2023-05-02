@@ -10,7 +10,7 @@ const RightMenuBar = () => {
   return (
     <div>
       {showIconBar ? (
-        <Box className="right-icon-btns-bar">
+        <Box sx={{display: {xs: 'none', md: 'none', lg: 'flex'}}} className="right-icon-btns-bar">
           <IconButton>
             <img
               alt="calendar logo"

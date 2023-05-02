@@ -10,24 +10,29 @@ import { SocketContext } from '../../../context/SocketContext'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import Emoji from 'react-emoji-render'
-import boingSound from '../../../assets/boing-tone.mp3'
 import plingSound from '../../../assets/pling-tone.mp3'
 import bubblingSound from '../../../assets/bubbling-tone.mp3'
 import popSound from '../../../assets/pop-tone.wav'
-const { Button, Card, Typography, Avatar, IconButton, SendIcon, Dialog } =
-  muiStyles
+const {
+  Button,
+  Card,
+  Typography,
+  Avatar,
+  IconButton,
+  SendIcon,
+  Dialog,
+  ArrowCircleDownSharpIcon,
+  SentimentSatisfiedAltIcon,
+  MenuIcon,
+  Box,
+} = muiStyles
 
 const ChatPage = () => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
-  const {
-    message,
-    updatedMessage,
-    updatedReaction,
-    hideChatsNotifications,
-    setHideChatsNotifications,
-  } = useContext(SocketContext)
+  const { message, updatedMessage, updatedReaction, getConversations } =
+    useContext(SocketContext)
   const { chat_id } = useParams()
   const [messageLoading, setMessageLoading] = useState(false)
   const [otherUser, setOtherUser] = useState({})
@@ -39,45 +44,60 @@ const ChatPage = () => {
   const [messagesEnd, setMessagesEnd] = useState(false)
   const [showDownBtn, setShowDownBtn] = useState(false)
   const [showEmojiDialog, setShowEmojiDialog] = useState(false)
+  const [showEmojiTyper, setShowEmojiTyper] = useState(false)
   const [showEmojiReactions, setShowEmojiReactions] = useState(false)
   const [messageToReact, setMessageToReact] = useState({})
   const [reactionToShow, setReactionToShow] = useState([])
   const conversationDivRef = useRef()
+  const typeEmojisRef = useRef()
   const limit = 50
 
   useEffect(() => {
-    const unreadMessages = messages.some(
-      (msg) => !msg.recipient_read && msg.recipient_id === user.id
-    )
-    console.log('unread messages: ', unreadMessages)
+    const handleClickOutside = (event) => {
+      if (
+        typeEmojisRef.current &&
+        !typeEmojisRef.current.contains(event.target)
+      ) {
+        setShowEmojiTyper(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [typeEmojisRef])
+
+  function markRead() {
+    axios
+      .put(`messages/mark/read/${chat_id}`)
+      .then(() => {
+        getConversations()
+      })
+      .catch(console.error)
+  }
+
+  useEffect(() => {
     if (!message || message.chatId !== chat_id) return
     setMessages([message, ...messages])
   }, [message])
 
-  // useEffect(() => {
-  //   // loop through messages and return true if there are any messages with a recipient_read value of false, and a recipient_id value that matches user.id
-  //   const unreadMessages = messages.some(
-  //     (msg) => !msg.recipient_read && msg.recipient_id === user.id
-  //   )
-  //   if (!unreadMessages) return
-  //   console.log('unread messages: ', unreadMessages)
-  //   const updatedMessages = messages.map((msg) => {
-  //     if (!msg.recipient_read && msg.recipient_id === user.id) {
-  //       console.log('before msg: ', msg)
-  //       msg.recipient_read = true
-  //       console.log('after msg: ', msg)
-  //     }
-  //     return msg
-  //   })
-  //   setMessages(updatedMessages)
-  //   setHideChatsNotifications(true)
-  //   axios
-  //     .put(`messages/mark/read/${chat_id}`)
-  //     .then(({ data }) => {
-  //       // loop through the messages array and mark any messages with a recipient_read value of false, and a recipient_id value that matches user.id, as read
-  //     })
-  //     .catch(console.error)
-  // }, [message, chat_id])
+  useEffect(() => {
+    if (!messages.length || messages[0].chatId !== chat_id) return
+    // if there are any messages that have a recipient_read value of false and a sender_id that is not the user's id, then return true
+    const unreadMessages = messages.some(
+      (message) => !message.recipient_read && message.sender_id !== user.id
+    )
+    if (!unreadMessages) return
+    // update the messages array to set messages to read so it does not try to mark them again
+    const readMessages = messages.map((message) => {
+      if (!message.recipient_read && message.sender_id !== user.id) {
+        message.recipient_read = true
+      }
+      return message
+    })
+    setMessages(readMessages)
+    markRead()
+  }, [chat_id, messages])
 
   function playSound(soundPath) {
     return (vol) => {
@@ -86,7 +106,6 @@ const ChatPage = () => {
       sound.play()
     }
   }
-  const playBoing = playSound(boingSound)
   const playPling = playSound(plingSound)
   const playBubbling = playSound(bubblingSound)
   const playPop = playSound(popSound)
@@ -139,6 +158,10 @@ const ChatPage = () => {
       }
     })
     setMessages(newArray)
+    return () => {
+      // reset chatId variable if user navigates away from chats
+      setChatId('')
+    }
   }, [updatedReaction])
 
   useEffect(() => {
@@ -187,6 +210,15 @@ const ChatPage = () => {
       setPageOffset(pageOffset + 1)
     }
   }
+  useEffect(() => {
+    setTimeout(() => {
+      if (!messages.length) return
+      const div = conversationDivRef.current
+      if (div.clientHeight === div.scrollHeight) {
+        setPageOffset(pageOffset + 1)
+      }
+    }, 250)
+  }, [chat_id, messages])
 
   function handleScrollDown() {
     const div = conversationDivRef.current
@@ -218,7 +250,6 @@ const ChatPage = () => {
     axios
       .get(`chat/${chat_id}/messages/${pageOffset}/${limit}`)
       .then(({ data }) => {
-        // console.log('DATA: ', data)
         setTimeout(() => {
           setIsLightLoading(false)
           if (data.length < 50) setMessagesEnd(true)
@@ -273,6 +304,7 @@ const ChatPage = () => {
     playPling(0.5)
     axios
       .post('chats/messages/create', {
+        messageType: 'text',
         text: messageInput,
         recipient: otherUser.id,
         chat: chat_id,
@@ -356,18 +388,20 @@ const ChatPage = () => {
   return (
     <div style={{ height: '100%', position: 'relative' }}>
       {showDownBtn && (
-        <Button
-          onClick={handleScrollDown}
-          className={
-            darkTheme
-              ? 'to-bot-btn to-bot-btn-dark'
-              : 'to-bot-btn to-bot-btn-light'
-          }
-        >
-          Back to bottom
-        </Button>
+        <IconButton onClick={handleScrollDown} className="to-bot-btn">
+          <ArrowCircleDownSharpIcon style={{ fontSize: 45 }} />
+        </IconButton>
       )}
-      <div className="right-chat-header" style={{ paddingLeft: '25px' }}>
+      <Box className="right-chat-header" sx={{ paddingLeft: {sm: '10px', md: '25px'} }}>
+        <IconButton
+          sx={{
+            padding: '12px',
+            marginRight: '10px',
+            display: { xs: 'block', sm: 'block', md: 'none' },
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
         <Avatar
           sx={{ width: 65, height: 65, color: 'white' }}
           alt={otherUser.username}
@@ -376,11 +410,12 @@ const ChatPage = () => {
         <Typography variant="h6" sx={{ marginLeft: '15px' }}>
           {otherUser.username}
         </Typography>
-      </div>
-      <div
+      </Box>
+      <Box
         ref={conversationDivRef}
         onScroll={handleScroll}
         className="chat-conversation-container"
+        sx={{padding: {xs: '10px', sm: '10px', md: '25px'}}}
       >
         {mappedMessages}
         {isLightLoading && (
@@ -412,7 +447,7 @@ const ChatPage = () => {
             -----
           </div>
         )}
-      </div>
+      </Box>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -439,6 +474,24 @@ const ChatPage = () => {
               darkTheme ? 'chat-message-input dark' : 'chat-message-input light'
             }
           />
+          <div ref={typeEmojisRef}>
+            <IconButton onClick={() => setShowEmojiTyper(!showEmojiTyper)}>
+              <SentimentSatisfiedAltIcon />
+            </IconButton>
+            {showEmojiTyper && (
+              <Card className="emoji-typer-card">
+                <Picker
+                  data={data}
+                  autoFocus
+                  maxFrequentRows={1}
+                  onEmojiSelect={(event) => {
+                    setMessageInput(messageInput + event.native)
+                  }}
+                  theme={darkTheme ? 'dark' : 'light'}
+                />
+              </Card>
+            )}
+          </div>
           {messageToEdit && (
             <Button
               onClick={handleCancelEdit}
@@ -475,7 +528,6 @@ const ChatPage = () => {
           }}
           theme={darkTheme ? 'dark' : 'light'}
         />
-        {/* <Button variant='text' color={darkTheme ? 'blueBtn' : 'primary'} onClick={() => setShowEmojiDialog(false)}>Close</Button> */}
       </Dialog>
       <Dialog
         onClose={() => setShowEmojiReactions(false)}

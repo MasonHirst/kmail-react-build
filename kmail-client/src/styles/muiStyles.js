@@ -61,8 +61,14 @@ import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import Dialog from '@mui/material/Dialog';
+import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
+import ArrowCircleDownSharpIcon from '@mui/icons-material/ArrowCircleDownSharp';
+import Drawer from '@mui/material/Drawer';
 
 let muiStyles = {
+  Drawer,
+  SentimentSatisfiedAltIcon,
+  ArrowCircleDownSharpIcon,
   Dialog,
   EditIcon,
   MoreVertIcon,

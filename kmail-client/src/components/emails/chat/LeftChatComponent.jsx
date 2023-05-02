@@ -6,17 +6,15 @@ import { AuthContext } from '../../../context/AuthenticationContext'
 import axios from 'axios'
 import ChatPreviewCard from './ChatPreviewCard'
 import muiStyles from '../../../styles/muiStyles'
-const { Button, IconButton, MoreVertOutlinedIcon, ChatBubbleOutlineOutlinedIcon, Typography } = muiStyles
+const { Button, IconButton, MoreVertOutlinedIcon, ChatBubbleOutlineOutlinedIcon, Typography, Box } = muiStyles
 
 const LeftChatComponent = () => {
   const {
     message,
     updatedMessage,
-    updatedReaction,
-    hideChatsNotifications,
-    setHideChatsNotifications,
     conversations,
     setConversations,
+    getConversations,
   } = useContext(SocketContext)
   const location = useLocation()
   const { setChatId, chatId, user } = useContext(AuthContext)
@@ -24,19 +22,18 @@ const LeftChatComponent = () => {
   const { darkTheme } = useContext(DarkModeContext)
 
   // loop through the conversations array and if any of the conversations have a latest_message with a recipient_read value of false and a sender_id that is not the user's id, then return true
-  useEffect(() => {
-    const unreadChat = conversations.some((conv) => {
-      return conv.latest_message.recipient_read === false && conv.latest_message.sender_id !== user.id
-    })
-    setHideChatsNotifications(!unreadChat)
-  }, [conversations])
+  
   
   const mappedConversations = conversations.map((conv, index) => {
     return <ChatPreviewCard key={index} data={conv} />
   })
 
   useEffect(() => {
-    if (!message) return
+    getConversations()
+  }, [])
+
+  useEffect(() => {
+    if (!message || !conversations.length) return
     const newArr = [...conversations]
     const index = newArr.findIndex((item) => item.chat.id === message.chatId)
     const obj = newArr[index]
@@ -45,19 +42,9 @@ const LeftChatComponent = () => {
     newArr.unshift(obj)
     setConversations(newArr)
   }, [message])
-
-  useEffect(() => {
-    axios.get('user/conversations/get')
-      .then(({data}) => {
-        setConversations(data)
-      })
-      .catch(err => {
-        console.error('ERROR IN LEFT CHAT COMPONENT: ', err)
-      })
-  }, [chatId, hideChatsNotifications])
   
   return (
-    <div className='left-chat-div'>
+    <Box sx={{display: {xs: 'none', sm: 'none', md: 'block'}}} className='left-chat-div'>
       <div className='left-chat-header'>
         <Typography variant='h6'>Messages</Typography>
         <IconButton>
@@ -88,7 +75,7 @@ const LeftChatComponent = () => {
       <div className='left-chat-chatlist'>
         {mappedConversations}
       </div>
-    </div>
+    </Box>
   )
 }
 
