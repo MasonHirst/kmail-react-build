@@ -41,6 +41,7 @@ const LoginPassword = () => {
 
   function handleClick() {
     if (isDeepLoading) return
+    setErrorMessage('')
     let input = inputRef.current.value
     if (input.length > 0) {
       setIsDeepLoading(true)

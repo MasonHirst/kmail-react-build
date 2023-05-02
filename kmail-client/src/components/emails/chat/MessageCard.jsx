@@ -13,37 +13,29 @@ const {
   MoreVertIcon,
   MenuItem,
   Menu,
+  Box,
 } = muiStyles
 
-const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDialog, openEmojiReactionsDialog }) => {
+const MessageCard = ({
+  message,
+  otherUser,
+  handleEditMessage,
+  openEmojiPickerDialog,
+  openEmojiReactionsDialog,
+}) => {
   const { darkTheme } = useContext(DarkModeContext)
   const [showDetails, setShowDetails] = useState(false)
   const { user } = useContext(AuthContext)
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
-  const [messageBubbleClass, setMessageBubbleClass] = useState('message-bubble')
+  const notUser = message.sender_id !== user.id
 
-  useEffect(() => {
-    let className = 'message-bubble'
-    if (message.sender_id !== user.id) {
-      className += ' message-bubble-left'
-      if (!darkTheme) className += ' message-bubble-left-light'
-    } else className += ' message-bubble-right'
-    if (message.reaction.length) className += ' message-bubble-with-reaction'
-    setMessageBubbleClass(className)
-  }, [darkTheme])
-
-  function handleClick() {
-    setShowDetails(!showDetails)
-  }
-
-  function handleMoreOptions(event) {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
+  let bubbleClass = 'message-bubble'
+  if (notUser) {
+    bubbleClass += ' message-bubble-left'
+    if (!darkTheme) bubbleClass += ' message-bubble-left-light'
+  } else bubbleClass += ' message-bubble-right'
+  if (message.reactions.length) bubbleClass += ' message-bubble-with-reaction'
 
   function formatTime(time) {
     const date = new Date(time)
@@ -103,63 +95,96 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
   }
 
   const emojiArray = []
-  message.reaction.map((emoji) => {
-    if (!emojiArray.length) emojiArray.push({emoji, count: 0})
+  message.reactions.map((emoji) => {
+    if (!emojiArray.length) emojiArray.push({ emoji, count: 0 })
     for (let i = 0; i < emojiArray.length; i++) {
       if (emojiArray[i].emoji.emoji.shortcodes === emoji.emoji.shortcodes) {
         emojiArray[i].count++
       } else {
-        emojiArray.push({emoji, count: 0})
+        emojiArray.push({ emoji, count: 0 })
       }
     }
   })
-  
+
   const mappedEmojis = emojiArray.map((emoji, index) => {
-    return <Emoji key={index}>{emoji.emoji.emoji.shortcodes} {emoji.count > 1 && <span style={{fontSize: '13px', position: 'relative', margin: '0 3px 0 2px',}}>{emoji.count}</span>}</Emoji>
+    return (
+      <Emoji key={index}>
+        {emoji.emoji.emoji.shortcodes}{' '}
+        {emoji.count > 1 && (
+          <span
+            style={{
+              fontSize: '13px',
+              position: 'relative',
+              margin: '0 3px 0 2px',
+            }}
+          >
+            {emoji.count}
+          </span>
+        )}
+      </Emoji>
+    )
   })
 
   return (
-    <div
-      onClick={handleClick}
+    <Box
+      onClick={() => setShowDetails(!showDetails)}
+      sx={{}}
       className={
         message.sender_id !== 'date marker'
-          ? message.sender_id !== user.id
+          ? notUser
             ? 'message-bubble-btn message-left'
             : 'message-bubble-btn message-right'
           : 'date-marker-container'
       }
     >
       {message.sender_id !== 'date marker' ? (
-        <div
+        <Box
+          sx={{
+            alignItems: message.sender_id === user.id && 'flex-end',
+            maxWidth: '80%',
+          }}
           className={
-            message.sender_id !== user.id
+            notUser
               ? 'message-bubble-container bubble-container-left'
               : 'message-bubble-container bubble-container-right'
           }
         >
-          <div
-            style={{
+          <Box
+            sx={{
               display: 'flex',
               gap: '3px',
               alignItems: 'center',
-              flexDirection:
-                message.sender_id !== user.id ? 'row' : 'row-reverse',
+              flexDirection: notUser ? 'row' : 'row-reverse',
             }}
           >
-            {message.sender_id !== user.id && (
+            {notUser && (
               <Avatar
                 sx={{
                   width: 46,
                   height: 46,
                   color: 'white',
                   marginRight: '5px',
-                  marginBottom: message.reaction.length ? '12px' : '0',
+                  marginBottom: message.reactions.length ? '12px' : '0',
                 }}
                 alt={otherUser.username}
                 src={otherUser.profile_pic}
               />
             )}
-            <div className={messageBubbleClass}>
+            <Box
+              className={bubbleClass}
+              sx={{ position: 'relative', }}
+            >
+              <IconButton
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+                className="message-options-btn"
+                sx={
+                  notUser
+                    ? { right: '-45px', display: { xs: 'none', sm: 'none' } }
+                    : { left: '-45px', display: { xs: 'none', sm: 'none' } }
+                }
+              >
+                <MoreVertIcon width={30} />
+              </IconButton>
               <div>
                 {message.text}{' '}
                 {message.edited && (
@@ -167,18 +192,17 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
                     style={{
                       fontSize: 14,
                       opacity: 0.7,
-                      textAlign:
-                        message.sender_id !== user.id ? 'left' : 'right',
+                      textAlign: notUser ? 'left' : 'right',
                     }}
                   >
                     (edited)
                   </p>
                 )}
               </div>
-              {!!message.reaction.length && (
+              {!!message.reactions.length && (
                 <Card
-                onClick={() => openEmojiReactionsDialog(message.reaction)}
-                className={
+                  onClick={() => openEmojiReactionsDialog(message.reactions)}
+                  className={
                     darkTheme
                       ? 'reactions-card reactions-card-dark'
                       : 'reactions-card reactions-card-light'
@@ -187,33 +211,18 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
                   {mappedEmojis}
                 </Card>
               )}
-            </div>
-            <IconButton
-              onClick={handleMoreOptions}
-              className="message-options-btn"
-              sx={{
-                padding: 'white',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '40px',
-                width: '40px',
-              }}
-            >
-              <MoreVertIcon width={30} />
-            </IconButton>
-
+            </Box>
             <Menu
               id="basic-menu"
               anchorEl={anchorEl}
               open={open}
-              onClose={handleClose}
+              onClose={() => setAnchorEl(null)}
               elevation={2}
             >
               {message.sender_id === user.id && (
                 <MenuItem
                   onClick={() => {
-                    handleClose()
+                    setAnchorEl(null)
                     handleEditMessage(message)
                   }}
                 >
@@ -223,20 +232,20 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
 
               <MenuItem
                 onClick={() => {
-                  handleClose()
+                  setAnchorEl(null)
                   openEmojiPickerDialog(message)
                 }}
               >
                 React
               </MenuItem>
-              <MenuItem onClick={handleClose}>Delete</MenuItem>
+              <MenuItem onClick={() => setAnchorEl(null)}>Delete</MenuItem>
             </Menu>
-          </div>
+          </Box>
           {showDetails ? (
             <Typography
               variant="subtitle1"
               className={
-                message.sender_id !== user.id
+                notUser
                   ? 'message-details-text details-left'
                   : 'message-details-text details-right'
               }
@@ -246,7 +255,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
           ) : (
             ''
           )}
-        </div>
+        </Box>
       ) : (
         <Typography sx={{ margin: '15px 0', fontSize: 14, opacity: 0.8 }}>
           {formatDate(message.createdAt) +
@@ -254,7 +263,7 @@ const MessageCard = ({ message, otherUser, handleEditMessage, openEmojiPickerDia
             formatTime(message.createdAt)}
         </Typography>
       )}
-    </div>
+    </Box>
   )
 }
 

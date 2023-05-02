@@ -7,6 +7,7 @@ const Message = db.define('message', {
     defaultValue: Sequelize.UUIDV4,
     primaryKey: true,
     allowNull: false,
+    unique: true,
   },
   text: {
     type: DataTypes.STRING({ length: 1000 }),
@@ -15,9 +16,7 @@ const Message = db.define('message', {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
-  reaction: {
-    type: DataTypes.JSON,
-  },
+  type: { type: DataTypes.STRING },
   recipient_read: { type: DataTypes.BOOLEAN, },
   sender_deleted: { type: DataTypes.BOOLEAN, },
   recipient_deleted: { type: DataTypes.BOOLEAN, },

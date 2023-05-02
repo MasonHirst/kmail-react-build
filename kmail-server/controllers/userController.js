@@ -2,9 +2,10 @@ const User = require('../models/users')
 const { sendMessageToClient } = require('./socketController')
 const Message = require('../models/messages')
 const Chat = require('../models/chats')
+const Reaction = require('../models/reactions')
 require('dotenv').config()
 const { Op } = require('sequelize')
-const { Sequelize, sequelize } = require('sequelize')
+const { Sequelize } = require('sequelize')
 
 module.exports = {
   updateDarkMode: async (req, res) => {
@@ -107,44 +108,32 @@ module.exports = {
         where: {
           [Op.or]: [{ user1: userId }, { user2: userId }],
         },
-        order: [['last_message', 'DESC']],
+        include: [
+          {
+            model: Message,
+            limit: 1,
+            order: [['createdAt', 'DESC']],
+          },
+          {
+            model: User,
+          },
+        ],
       })
-
       let loopedConversations = []
-      for (i = 0; i < conversations.length; i++) {
-        let hasMessage = await Message.findOne({
-          where: { chat_id: conversations[i].id },
-          order: [['createdAt', 'DESC']],
-        })
-        if (hasMessage) {
-          // console.log('user1: ', conversations[i].user1)
-          if (conversations[i].user1 === userId) {
-            let otherUser = await User.findOne({
-              where: { id: conversations[i].user2 },
-            })
-            loopedConversations.push({
-              chat: conversations[i],
-              latest_message: hasMessage,
-              otherId: otherUser.id,
-              username: otherUser.username,
-              profile_pic: otherUser.profile_pic,
-            })
-          } else {
-            let otherUser = await User.findOne({
-              where: { id: conversations[i].user1 },
-            })
-            loopedConversations.push({
-              chat: conversations[i],
-              latest_message: hasMessage,
-              otherId: otherUser.id,
-              username: otherUser.username,
-              profile_pic: otherUser.profile_pic,
-            })
-          }
-        }
+      for (let i = 0; i < conversations.length; i++) {
+        const convo = conversations[i].dataValues
+        const otherUser = userId === convo.user1 ? convo.user2 : convo.user1
+        const user = await User.findOne({ where: { id: otherUser } })
+        let obj = { chat: convo, otherUser: user.dataValues, latest_message: convo.messages[0], }
+        if (obj.latest_message) loopedConversations.push(obj)
       }
 
-      res.status(200).send(loopedConversations)
+      const sortedConvos = loopedConversations.sort((a, b) => {
+        const dateA = new Date(a.latest_message.createdAt)
+        const dateB = new Date(b.latest_message.createdAt)
+        return dateB - dateA
+      })
+      res.send(sortedConvos)
     } catch (err) {
       console.error(err)
       res.status(403).send(err)
@@ -155,7 +144,7 @@ module.exports = {
     const { id } = req.params
     try {
       const message = await Message.findOne({
-        where: { chat_id: id },
+        where: { chatId: id },
         order: [['createdAt', 'DESC']],
       })
       res.send(message)
@@ -169,11 +158,25 @@ module.exports = {
     const { id, offset, limit } = req.params
     try {
       const messages = await Message.findAll({
-        where: { chat_id: id },
+        where: { chatId: id },
         order: [['createdAt', 'DESC']],
-        limit: limit, // load only 'limit' number of messages
+        limit: limit,
         offset: offset * limit,
+        include: [
+          {
+            model: Reaction,
+            as: 'reactions',
+            required: false,
+            include: [
+              {
+                model: User,
+                as: 'user',
+              },
+            ],
+          },
+        ],
       })
+
       res.send(messages)
     } catch (err) {
       console.error(err)
@@ -182,29 +185,37 @@ module.exports = {
   },
 
   createMessage: async (req, res) => {
-    const { userId, text, recipient, chat } = req.body
+    const { userId, text, recipient, chat, messageType } = req.body
     try {
-      let message = await Message.create({
+      const message = await Message.create({
         text,
         edited: false,
-        reaction: [],
         sender_id: userId,
         recipient_id: recipient,
-        chat_id: chat,
+        chatId: chat,
         recipient_read: false,
         sender_deleted: false,
         recipient_deleted: false,
+        type: messageType
+      })
+      await message.reload({
+        include: [
+          {
+            model: Reaction,
+            as: 'reactions',
+          },
+        ],
       })
       if (message) {
-        console.log('recipients: ', message.recipient_id, message.sender_id)
         sendMessageToClient(
-          [message.recipient_id, message.sender_id], 'newMessage',
+          [message.recipient_id, message.sender_id],
+          'newMessage',
           message.dataValues
         )
-        let updateChat = await Chat.update(
-          { last_message: new Date() },
-          { where: { id: chat } }
-        )
+        // let updateChat = await Chat.update(
+        //   { last_message: new Date() },
+        //   { where: { id: chat } }
+        // )
       }
       res.send(message)
     } catch (err) {
@@ -214,24 +225,19 @@ module.exports = {
   },
 
   editMessage: async (req, res) => {
-    const { event, editorId, recipient_id, text, messageId } = req.body
+    const { editorId, recipient_id, text, messageId } = req.body
     try {
-      if (event === 'editMessage') {
-        const updatedText = await Message.update(
-          { text, edited: true },
-          { where: { id: messageId } }
-        )
-        const body = {
-          messageId,
-          text,
-          id: messageId,
-        }
-        sendMessageToClient([editorId, recipient_id], 'updatedMessage', body)
-        return res.send(updatedText)
-      } else if (event === 'newReaction') {
-        res.send('function needs finishing')
+      const updatedText = await Message.update(
+        { text, edited: true },
+        { where: { id: messageId } }
+      )
+      const body = {
+        messageId,
+        text,
+        id: messageId,
       }
-      res.send('unknown protocall request')
+      sendMessageToClient([editorId, recipient_id], 'updatedMessage', body)
+      res.send(updatedText)
     } catch (err) {
       console.error(err)
       res.status(403).send(err)
@@ -239,40 +245,70 @@ module.exports = {
   },
 
   editReaction: async (req, res) => {
-    const { emoji, reactMessage, user } = req.body
+    const { emoji, reactMessage, userId } = req.body
     try {
-      const checkArray = reactMessage.reaction.filter(
-        (item) => item.user.id !== user.id
-      )
-      const reactionObj = [...checkArray, { emoji, user, reactMessage }]
-      
-      sendMessageToClient(
-        [reactMessage.sender_id, reactMessage.recipient_id], 'updatedReaction',
-        reactionObj
-      )
-      const updatedReaction = await Message.update(
-        { reaction: reactionObj },
-        { where: { id: reactMessage.id } }
-      )
-      res.send(updatedReaction)
+      // I need to determine if the user has already reacted to this message, if so, I need to update the reaction instead of creating a new one
+      const reaction = await Reaction.findOne({
+        where: {
+          messageId: reactMessage.id,
+          userId,
+        },
+      })
+      if (reaction) {
+        const updatedReaction = await Reaction.update(
+          { emoji },
+          { where: { id: reaction.id }, returning: true, plain: true }
+        )
+        await updatedReaction[1].reload({
+          include: [{ model: User, as: 'user' }],
+        })
+        sendMessageToClient(
+          [reactMessage.sender_id, reactMessage.recipient_id],
+          'newReaction',
+          updatedReaction[1]
+        )
+        res.send(updatedReaction[1])
+      } else {
+        const newReaction = await Reaction.create({
+          emoji,
+          messageId: reactMessage.id,
+          userId,
+        })
+
+        await newReaction.reload({
+          include: [{ model: User, as: 'user' }],
+        })
+        delete newReaction.user.dataValues.hashed_pass
+        sendMessageToClient(
+          [reactMessage.sender_id, reactMessage.recipient_id],
+          'newReaction',
+          newReaction
+        )
+        res.send(newReaction)
+      }
     } catch (err) {
       console.error(err)
       res.status(403).send(err)
     }
   },
+
+  markMessagesRead: async (req, res) => {
+    const { chat_id } = req.params
+    const { userId } = req.body
+    try {
+      const readMessages = await Message.update(
+        { recipient_read: true },
+        {
+          where: {
+            chatId: chat_id,
+            recipient_id: userId,
+            recipient_read: false,
+          },
+        }
+      )
+      res.send(readMessages)
+    } catch (err) {
+      res.status(403).send(err)
+    }
+  },
 }
-
-// {
-//   text: '',
-//   edited: false,
-//   reaction: {emoji: ''},
-//   sender_id: userId,
-//   recipient_id: recipient,
-// }
-
-// try {
-//   res.send('you made it')
-// } catch (err) {
-//   console.log(err)
-//   res.status(403).send(err)
-// }

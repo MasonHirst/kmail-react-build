@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
 } from 'react'
+import axios from 'axios'
 import notificationSound from '../assets/positive-tone.mp3'
 import { AuthContext } from './AuthenticationContext'
 
@@ -20,14 +21,36 @@ export const SocketProvider = ({ children }) => {
   const { user } = useContext(AuthContext)
   const [updatedMessage, setUpdatedMessage] = useState('')
   const [socket, setSocket] = useState()
+  const [hideChatsNotifications, setHideChatsNotifications] = useState(true)
+  const [conversations, setConversations] = useState([])
 
   console.success = function(message) {
-    console.log("%c✅ " + message, "color: #04A57D; font-weight: bold;");
+    console.log("%c✅ " + message, "color: #04A57D; font-weight: bold;")
   }
   
   console.warning = function(message) {
-    console.log("%c⚠️ " + message, "color: yellow; font-weight: bold;");
+    console.log("%c⚠️ " + message, "color: yellow; font-weight: bold;")
   }
+
+  function getConversations() {
+    axios.get('user/conversations/get')
+      .then(({data}) => {
+        setConversations(data)
+      })
+      .catch(err => {
+        console.error('ERROR IN LEFT CHAT COMPONENT: ', err)
+      })
+  }
+  useEffect(() => {
+    getConversations()
+  }, [message])
+  useEffect(() => {
+    if (!conversations.length) return
+    const unreadChat = conversations.some((conv) => {
+      return conv.latest_message.recipient_read === false && conv.latest_message.sender_id !== user.id
+    })
+    setHideChatsNotifications(!unreadChat)
+  }, [conversations])
 
   let connectCounter = 0
   useEffect(() => {
@@ -49,13 +72,13 @@ export const SocketProvider = ({ children }) => {
           setMessage(messageData.message)
         } else if (messageData.event_type === 'updatedMessage') {
           setUpdatedMessage(messageData.message)
-        } else if (messageData.event_type === 'updatedReaction') {
+        } else if (messageData.event_type === 'newReaction') {
           setUpdatedReaction(messageData.message)
         }
       })
 
       ws.addEventListener('close', function () {
-        console.warning('Disconnected from server')
+        console.warning('Disconnected from socket server')
         connectCounter++
         setTimeout(() => {
           console.warning('Reconnecting...')
@@ -80,9 +103,13 @@ export const SocketProvider = ({ children }) => {
       value={{
         message,
         setMessage,
-        // sendMessage,
+        hideChatsNotifications,
+        setHideChatsNotifications,
         updatedMessage,
         updatedReaction,
+        conversations,
+        setConversations,
+        getConversations,
       }}
     >
       {children}

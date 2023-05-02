@@ -10,14 +10,28 @@ import { SocketContext } from '../../../context/SocketContext'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import Emoji from 'react-emoji-render'
-const { Button, Card, Typography, Avatar, IconButton, SendIcon, Dialog } =
-  muiStyles
+import plingSound from '../../../assets/pling-tone.mp3'
+import bubblingSound from '../../../assets/bubbling-tone.mp3'
+import popSound from '../../../assets/pop-tone.wav'
+const {
+  Button,
+  Card,
+  Typography,
+  Avatar,
+  IconButton,
+  SendIcon,
+  Dialog,
+  ArrowCircleDownSharpIcon,
+  SentimentSatisfiedAltIcon,
+  MenuIcon,
+  Box,
+} = muiStyles
 
 const ChatPage = () => {
   const { isLightLoading, setIsLightLoading, user, setChatId } =
     useContext(AuthContext)
   const { darkTheme } = useContext(DarkModeContext)
-  const { message, sendMessage, updatedMessage, setMessage, updatedReaction } =
+  const { message, updatedMessage, updatedReaction, getConversations } =
     useContext(SocketContext)
   const { chat_id } = useParams()
   const [messageLoading, setMessageLoading] = useState(false)
@@ -30,11 +44,76 @@ const ChatPage = () => {
   const [messagesEnd, setMessagesEnd] = useState(false)
   const [showDownBtn, setShowDownBtn] = useState(false)
   const [showEmojiDialog, setShowEmojiDialog] = useState(false)
+  const [showEmojiTyper, setShowEmojiTyper] = useState(false)
   const [showEmojiReactions, setShowEmojiReactions] = useState(false)
   const [messageToReact, setMessageToReact] = useState({})
   const [reactionToShow, setReactionToShow] = useState([])
   const conversationDivRef = useRef()
+  const typeEmojisRef = useRef()
   const limit = 50
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        typeEmojisRef.current &&
+        !typeEmojisRef.current.contains(event.target)
+      ) {
+        setShowEmojiTyper(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [typeEmojisRef])
+
+  function markRead() {
+    axios
+      .put(`messages/mark/read/${chat_id}`)
+      .then(() => {
+        getConversations()
+      })
+      .catch(console.error)
+  }
+
+  useEffect(() => {
+    if (!message || message.chatId !== chat_id) return
+    setMessages([message, ...messages])
+  }, [message])
+
+  useEffect(() => {
+    if (!messages.length || messages[0].chatId !== chat_id) return
+    // if there are any messages that have a recipient_read value of false and a sender_id that is not the user's id, then return true
+    const unreadMessages = messages.some(
+      (message) => !message.recipient_read && message.sender_id !== user.id
+    )
+    if (!unreadMessages) return
+    // update the messages array to set messages to read so it does not try to mark them again
+    const readMessages = messages.map((message) => {
+      if (!message.recipient_read && message.sender_id !== user.id) {
+        message.recipient_read = true
+      }
+      return message
+    })
+    setMessages(readMessages)
+    markRead()
+  }, [chat_id, messages])
+
+  function playSound(soundPath) {
+    return (vol) => {
+      const sound = new Audio(soundPath)
+      sound.volume = vol || 0.3
+      sound.play()
+    }
+  }
+  const playPling = playSound(plingSound)
+  const playBubbling = playSound(bubblingSound)
+  const playPop = playSound(popSound)
+
+  useEffect(() => {
+    if (!showEmojiDialog) return
+    playBubbling()
+  }, [showEmojiDialog])
 
   function openEmojiPickerDialog(messageObj) {
     setMessageToReact(messageObj)
@@ -46,31 +125,43 @@ const ChatPage = () => {
     setShowEmojiReactions(true)
   }
 
-  function handleSubmitEmoji(emoji, user) {
+  function handleSubmitEmoji(emoji) {
     axios
       .put('chats/messages/edit/reaction', {
         emoji,
         reactMessage: messageToReact,
-        user,
+        protocall: 'newReaction',
       })
-      .then(() => {})
+      .then(({ data }) => {
+        playPop()
+      })
       .catch(console.error)
   }
 
   useEffect(() => {
-    if (!updatedReaction.length) return
-    const newArr = [...messages]
-    for (let i = 0; i < updatedReaction.length; i++) {
-      const messageId = updatedReaction[i].reactMessage.id
-      const react = updatedReaction[i].reactMessage.reaction
-      for (let j = 0; j < newArr.length; j++) {
-        if (messageId === newArr[j].id) {
-          newArr[j].reaction = react
-          break
+    // each message in the messages array has a reaction array. I want to add the updated reaction to the message that has the same id as the updated reaction, unless there is already a reaction with the same user.id, in which case I want to remove that reaction from the message and add the updated reaction to the message
+    if (!updatedReaction) return
+    const newArray = messages.map((obj) => {
+      if (obj.id === updatedReaction.messageId) {
+        const reactionIndex = obj.reactions.findIndex(
+          (reaction) => reaction.user.id === updatedReaction.user.id
+        )
+        if (reactionIndex === -1) {
+          obj.reactions.push(updatedReaction)
+        } else {
+          obj.reactions.splice(reactionIndex, 1)
+          obj.reactions.push(updatedReaction)
         }
+        return obj
+      } else {
+        return obj
       }
+    })
+    setMessages(newArray)
+    return () => {
+      // reset chatId variable if user navigates away from chats
+      setChatId('')
     }
-    setMessages(newArr)
   }, [updatedReaction])
 
   useEffect(() => {
@@ -109,9 +200,9 @@ const ChatPage = () => {
 
   function handleScroll() {
     const div = conversationDivRef.current
-    if (div.scrollTop < -500 && !showDownBtn) {
+    if (div.scrollTop < -700 && !showDownBtn) {
       setShowDownBtn(true)
-    } else if (div.scrollTop > -500 && showDownBtn) {
+    } else if (div.scrollTop > -700 && showDownBtn) {
       setShowDownBtn(false)
     }
     if (messagesEnd) return
@@ -119,6 +210,15 @@ const ChatPage = () => {
       setPageOffset(pageOffset + 1)
     }
   }
+  useEffect(() => {
+    setTimeout(() => {
+      if (!messages.length) return
+      const div = conversationDivRef.current
+      if (div.clientHeight === div.scrollHeight) {
+        setPageOffset(pageOffset + 1)
+      }
+    }, 250)
+  }, [chat_id, messages])
 
   function handleScrollDown() {
     const div = conversationDivRef.current
@@ -157,7 +257,7 @@ const ChatPage = () => {
             setMessagesEnd(true)
             return
           }
-          if (messages.length && data[0].chat_id !== messages[0].chat_id) {
+          if (messages.length && data[0].chatId !== messages[0].chatId) {
             setMessages(data)
           } else {
             setMessages([...messages, ...data])
@@ -171,11 +271,6 @@ const ChatPage = () => {
         console.error('ERROR IN CHATPAGE MESSAGES: ', err)
       })
   }, [chat_id, pageOffset])
-
-  useEffect(() => {
-    if (!message) return
-    setMessages([message, ...messages])
-  }, [message])
 
   useEffect(() => {
     if (!updatedReaction.length) return
@@ -203,11 +298,13 @@ const ChatPage = () => {
       .catch(console.error)
   }
 
-  function handleSubmit(event) {
+  function handleSubmit() {
     setMessageInput('')
     setMessageLoading(true)
+    playPling(0.5)
     axios
       .post('chats/messages/create', {
+        messageType: 'text',
         text: messageInput,
         recipient: otherUser.id,
         chat: chat_id,
@@ -231,7 +328,7 @@ const ChatPage = () => {
         markedMessages.push({
           sender_id: 'date marker',
           createdAt: currentMessage.createdAt,
-          reaction: [],
+          reactions: [],
         })
       }
       // If this message and the next message are on different days, add a date marker for the current message's createdAt date
@@ -242,7 +339,7 @@ const ChatPage = () => {
         markedMessages.push({
           sender_id: 'date marker',
           createdAt: currentMessage.createdAt,
-          reaction: [],
+          reactions: [],
         })
       }
       markedMessages.push(currentMessage)
@@ -259,7 +356,7 @@ const ChatPage = () => {
     )
   }
 
-  let mappedMessages = addDateMarkers(messages).map((message, index) => {
+  const mappedMessages = addDateMarkers(messages).map((message, index) => {
     return (
       <MessageCard
         handleEditMessage={handleEditMessage}
@@ -274,16 +371,16 @@ const ChatPage = () => {
 
   const mappedReactions = reactionToShow.map((item, index) => {
     return (
-      <div key={index} className='reaction-dialog-item'>
-        <div style={{display: 'flex', alignItems: 'center', gap: '10px',}}>
+      <div key={index} className="reaction-dialog-item">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Avatar
             sx={{ width: 30, height: 30, color: 'white' }}
             alt={item.user.username}
             src={item.user.profile_pic}
           />
-          <Typography>{item.user.username}</Typography>
+          <Typography variant="h6">{item.user.username}</Typography>
         </div>
-        <Emoji style={{fontSize: '25px'}}>{item.emoji.shortcodes}</Emoji>
+        <Emoji style={{ fontSize: '30px' }}>{item.emoji.shortcodes}</Emoji>
       </div>
     )
   })
@@ -291,18 +388,20 @@ const ChatPage = () => {
   return (
     <div style={{ height: '100%', position: 'relative' }}>
       {showDownBtn && (
-        <Button
-          onClick={handleScrollDown}
-          className={
-            darkTheme
-              ? 'to-bot-btn to-bot-btn-dark'
-              : 'to-bot-btn to-bot-btn-light'
-          }
-        >
-          Back to bottom
-        </Button>
+        <IconButton onClick={handleScrollDown} className="to-bot-btn">
+          <ArrowCircleDownSharpIcon style={{ fontSize: 45 }} />
+        </IconButton>
       )}
-      <div className="right-chat-header" style={{ paddingLeft: '25px' }}>
+      <Box className="right-chat-header" sx={{ paddingLeft: {sm: '10px', md: '25px'} }}>
+        <IconButton
+          sx={{
+            padding: '12px',
+            marginRight: '10px',
+            display: { xs: 'block', sm: 'block', md: 'none' },
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
         <Avatar
           sx={{ width: 65, height: 65, color: 'white' }}
           alt={otherUser.username}
@@ -311,11 +410,12 @@ const ChatPage = () => {
         <Typography variant="h6" sx={{ marginLeft: '15px' }}>
           {otherUser.username}
         </Typography>
-      </div>
-      <div
+      </Box>
+      <Box
         ref={conversationDivRef}
         onScroll={handleScroll}
         className="chat-conversation-container"
+        sx={{padding: {xs: '10px', sm: '10px', md: '25px'}}}
       >
         {mappedMessages}
         {isLightLoading && (
@@ -347,7 +447,7 @@ const ChatPage = () => {
             -----
           </div>
         )}
-      </div>
+      </Box>
       <form
         onSubmit={(e) => {
           e.preventDefault()
@@ -374,6 +474,24 @@ const ChatPage = () => {
               darkTheme ? 'chat-message-input dark' : 'chat-message-input light'
             }
           />
+          <div ref={typeEmojisRef}>
+            <IconButton onClick={() => setShowEmojiTyper(!showEmojiTyper)}>
+              <SentimentSatisfiedAltIcon />
+            </IconButton>
+            {showEmojiTyper && (
+              <Card className="emoji-typer-card">
+                <Picker
+                  data={data}
+                  autoFocus
+                  maxFrequentRows={1}
+                  onEmojiSelect={(event) => {
+                    setMessageInput(messageInput + event.native)
+                  }}
+                  theme={darkTheme ? 'dark' : 'light'}
+                />
+              </Card>
+            )}
+          </div>
           {messageToEdit && (
             <Button
               onClick={handleCancelEdit}
@@ -394,25 +512,40 @@ const ChatPage = () => {
           <SendIcon />
         </IconButton>
       </form>
-      <Dialog onClose={() => setShowEmojiDialog(false)} open={showEmojiDialog}>
+      <Dialog
+        onClose={() => setShowEmojiDialog(false)}
+        PaperProps={{
+          style: { borderRadius: 15 },
+        }}
+        open={showEmojiDialog}
+      >
         <Picker
           data={data}
           autoFocus
           onEmojiSelect={(event) => {
-            handleSubmitEmoji(event, user)
+            handleSubmitEmoji(event)
             setShowEmojiDialog(false)
           }}
           theme={darkTheme ? 'dark' : 'light'}
         />
-        {/* <Button variant='text' color={darkTheme ? 'blueBtn' : 'primary'} onClick={() => setShowEmojiDialog(false)}>Close</Button> */}
       </Dialog>
       <Dialog
         onClose={() => setShowEmojiReactions(false)}
         open={showEmojiReactions}
+        PaperProps={{
+          style: { borderRadius: 15 },
+        }}
       >
-        <Card className='reactions-dialog-card'>
+        <Card className="reactions-dialog-card">
           {mappedReactions}
-          <Button variant='text' color={darkTheme ? 'blueBtn' : 'primary'} sx={{textTransform: 'none', fontSize: '18px'}} onClick={() => setShowEmojiReactions(false)}>close</Button>
+          <Button
+            variant="text"
+            color={darkTheme ? 'blueBtn' : 'primary'}
+            sx={{ textTransform: 'none', fontSize: '18px' }}
+            onClick={() => setShowEmojiReactions(false)}
+          >
+            close
+          </Button>
         </Card>
       </Dialog>
     </div>
