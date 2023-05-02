@@ -19,6 +19,7 @@ const {
   FormControlLabel,
   Switch,
   Button,
+  Drawer,
 } = muiStyles
 
 const Header = () => {
@@ -28,6 +29,7 @@ const Header = () => {
   const { darkTheme, setDarkTheme } = useContext(DarkModeContext)
   const settingsRef = useRef(null)
   const [showProfile, setShowProfile] = useState(false)
+  const [showNavDrawer, setShowNavDrawer] = useState(false)
   const profileRef = useRef(null)
 
   // This use effect closes the settings popup when you click outside it
@@ -77,9 +79,9 @@ const Header = () => {
       }}
     >
       <Box
-        style={{
+        sx={{
           width: '240px',
-          minWidth: '240px',
+          minWidth: {xs: '0', sm: '240px'},
           height: '64px',
           padding: '8px',
           display: 'flex',
@@ -89,19 +91,19 @@ const Header = () => {
           marginRight: '10px',
         }}
       >
-        <IconButton style={{ padding: '12px', margin: '0 4px' }}>
+        <IconButton sx={{ padding: {xs: '0', sm: '12px'}, margin: '0 4px', display: {lg: 'none'} }} onClick={() => setShowNavDrawer(!showNavDrawer)}>
           <MenuIcon />
         </IconButton>
         <img src={K_logo} alt="Kmail logo" className="logo-img" />
         <Typography
           variant="subtitle"
-          style={{ fontSize: '25px', letterSpacing: '.5px' }}
+          sx={{ fontSize: '25px', letterSpacing: '.5px', display: {xs: 'none', sm: 'block'} }}
         >
           Kmail
         </Typography>
       </Box>
 
-      <Box sx={{ flexGrow: 1 }} className="header-bar-right">
+      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }} className="header-bar-right">
         <div
           className={
             searchFocus
@@ -123,7 +125,7 @@ const Header = () => {
           </IconButton>
         </div>
 
-        <div className="header-icons-section-right">
+        <Box sx={{ gap: {xs: '0', sm: '5px'} }} className="header-icons-section-right">
           <IconButton>
             <HelpOutlineOutlinedIcon />
           </IconButton>
@@ -170,7 +172,7 @@ const Header = () => {
               </PopupModal>
             )}
           </div>
-        </div>
+        </Box>
       </Box>
     </div>
   )

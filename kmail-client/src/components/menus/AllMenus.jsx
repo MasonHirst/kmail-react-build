@@ -9,7 +9,7 @@ import Header from './Header.jsx'
 import muiStyles from '../../styles/muiStyles'
 import { AuthContext } from '../../context/AuthenticationContext'
 import { DarkModeContext } from '../../context/DarkThemeContext'
-const { Button, CreateOutlinedIcon } = muiStyles
+const { Button, CreateOutlinedIcon, Box } = muiStyles
 
 const AllMenus = () => {
   const { user } = useContext(AuthContext)
@@ -30,9 +30,9 @@ const AllMenus = () => {
       }}
     >
       <Header />
-      <div
+      <Box
         style={{
-          width: '240px',
+          width: {md: '240px', sm: '200px'},
           marginRight: '10px',
         }}
       >
@@ -46,7 +46,7 @@ const AllMenus = () => {
                 if (!showComposeDialog) setShowComposeDialog(true)
               }}
               startIcon={<CreateOutlinedIcon />}
-              style={{
+              sx={{
                 backgroundColor: 'white',
                 color: '#5F6368',
                 textTransform: 'none',
@@ -55,6 +55,7 @@ const AllMenus = () => {
                 borderRadius: '12px',
                 margin: ' 8px 0 16px 0',
                 marginLeft: '8px',
+                display: { xs: 'none', md: 'none', lg: 'flex' },
               }}
             >
               Compose
@@ -66,7 +67,7 @@ const AllMenus = () => {
           <RightMenuBar />
           {showComposeDialog && <ComposeEmailDialog showComposeDialog={showComposeDialog} setShowComposeDialog={setShowComposeDialog} />}
         </div>
-      </div>
+      </Box>
     </div>
   )
 }

@@ -25,11 +25,11 @@ export const SocketProvider = ({ children }) => {
   const [conversations, setConversations] = useState([])
 
   console.success = function(message) {
-    console.log("%c✅ " + message, "color: #04A57D; font-weight: bold;");
+    console.log("%c✅ " + message, "color: #04A57D; font-weight: bold;")
   }
   
   console.warning = function(message) {
-    console.log("%c⚠️ " + message, "color: yellow; font-weight: bold;");
+    console.log("%c⚠️ " + message, "color: yellow; font-weight: bold;")
   }
 
   function getConversations() {
@@ -41,6 +41,16 @@ export const SocketProvider = ({ children }) => {
         console.error('ERROR IN LEFT CHAT COMPONENT: ', err)
       })
   }
+  useEffect(() => {
+    getConversations()
+  }, [message])
+  useEffect(() => {
+    if (!conversations.length) return
+    const unreadChat = conversations.some((conv) => {
+      return conv.latest_message.recipient_read === false && conv.latest_message.sender_id !== user.id
+    })
+    setHideChatsNotifications(!unreadChat)
+  }, [conversations])
 
   let connectCounter = 0
   useEffect(() => {
@@ -68,7 +78,7 @@ export const SocketProvider = ({ children }) => {
       })
 
       ws.addEventListener('close', function () {
-        console.warning('Disconnected from server')
+        console.warning('Disconnected from socket server')
         connectCounter++
         setTimeout(() => {
           console.warning('Reconnecting...')
@@ -99,6 +109,7 @@ export const SocketProvider = ({ children }) => {
         updatedReaction,
         conversations,
         setConversations,
+        getConversations,
       }}
     >
       {children}

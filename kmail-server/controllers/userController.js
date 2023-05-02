@@ -108,43 +108,32 @@ module.exports = {
         where: {
           [Op.or]: [{ user1: userId }, { user2: userId }],
         },
-        order: [['last_message', 'DESC']],
+        include: [
+          {
+            model: Message,
+            limit: 1,
+            order: [['createdAt', 'DESC']],
+          },
+          {
+            model: User,
+          },
+        ],
       })
-
       let loopedConversations = []
-      for (i = 0; i < conversations.length; i++) {
-        let hasMessage = await Message.findOne({
-          where: { chatId: conversations[i].id },
-          order: [['createdAt', 'DESC']],
-        })
-        if (hasMessage) {
-          if (conversations[i].user1 === userId) {
-            let otherUser = await User.findOne({
-              where: { id: conversations[i].user2 },
-            })
-            loopedConversations.push({
-              chat: conversations[i],
-              latest_message: hasMessage,
-              otherId: otherUser.id,
-              username: otherUser.username,
-              profile_pic: otherUser.profile_pic,
-            })
-          } else {
-            let otherUser = await User.findOne({
-              where: { id: conversations[i].user1 },
-            })
-            loopedConversations.push({
-              chat: conversations[i],
-              latest_message: hasMessage,
-              otherId: otherUser.id,
-              username: otherUser.username,
-              profile_pic: otherUser.profile_pic,
-            })
-          }
-        }
+      for (let i = 0; i < conversations.length; i++) {
+        const convo = conversations[i].dataValues
+        const otherUser = userId === convo.user1 ? convo.user2 : convo.user1
+        const user = await User.findOne({ where: { id: otherUser } })
+        let obj = { chat: convo, otherUser: user.dataValues, latest_message: convo.messages[0], }
+        if (obj.latest_message) loopedConversations.push(obj)
       }
 
-      res.status(200).send(loopedConversations)
+      const sortedConvos = loopedConversations.sort((a, b) => {
+        const dateA = new Date(a.latest_message.createdAt)
+        const dateB = new Date(b.latest_message.createdAt)
+        return dateB - dateA
+      })
+      res.send(sortedConvos)
     } catch (err) {
       console.error(err)
       res.status(403).send(err)
@@ -196,7 +185,7 @@ module.exports = {
   },
 
   createMessage: async (req, res) => {
-    const { userId, text, recipient, chat } = req.body
+    const { userId, text, recipient, chat, messageType } = req.body
     try {
       const message = await Message.create({
         text,
@@ -207,6 +196,7 @@ module.exports = {
         recipient_read: false,
         sender_deleted: false,
         recipient_deleted: false,
+        type: messageType
       })
       await message.reload({
         include: [
@@ -222,10 +212,10 @@ module.exports = {
           'newMessage',
           message.dataValues
         )
-        let updateChat = await Chat.update(
-          { last_message: new Date() },
-          { where: { id: chat } }
-        )
+        // let updateChat = await Chat.update(
+        //   { last_message: new Date() },
+        //   { where: { id: chat } }
+        // )
       }
       res.send(message)
     } catch (err) {
@@ -279,16 +269,11 @@ module.exports = {
         )
         res.send(updatedReaction[1])
       } else {
-        const newReaction = await Reaction.create(
-          {
-            emoji,
-            messageId: reactMessage.id,
-            userId,
-          }
-          // {
-          //   include: [{ model: User, as: 'user' }],
-          // }
-        )
+        const newReaction = await Reaction.create({
+          emoji,
+          messageId: reactMessage.id,
+          userId,
+        })
 
         await newReaction.reload({
           include: [{ model: User, as: 'user' }],
@@ -308,14 +293,22 @@ module.exports = {
   },
 
   markMessagesRead: async (req, res) => {
-    const {chat_id} = req.params
-    const {userId} = req.body
+    const { chat_id } = req.params
+    const { userId } = req.body
     try {
-      const readMessages = await Message.update({recipient_read: true}, {where: {chatId: chat_id, recipient_id: userId, recipient_read: false}})
-      console.log('readMessages: ', readMessages)
+      const readMessages = await Message.update(
+        { recipient_read: true },
+        {
+          where: {
+            chatId: chat_id,
+            recipient_id: userId,
+            recipient_read: false,
+          },
+        }
+      )
+      res.send(readMessages)
     } catch (err) {
       res.status(403).send(err)
     }
   },
 }
-

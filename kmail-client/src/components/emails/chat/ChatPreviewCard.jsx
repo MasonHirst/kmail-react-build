@@ -16,8 +16,10 @@ const ChatPreviewCard = ({ data }) => {
   } = useContext(SocketContext)
   const navigate = useNavigate()
 
-  const unreadChat = data.latest_message.recipient_read === false && data.latest_message.sender_id !== user.id
-  
+  const unreadChat =
+    data.latest_message.recipient_read === false &&
+    data.latest_message.sender_id !== user.id
+
   function handleClick() {
     if (data.chat.id !== chatId) {
       navigate(data.chat.id)
@@ -56,47 +58,55 @@ const ChatPreviewCard = ({ data }) => {
   }
 
   return (
-    <Button onClick={handleClick} fullWidth className="chat-preview-card">
-      <Avatar
-        sx={{ width: 45, height: 45, color: 'white' }}
-        alt={data.username}
-        src={data.profile_pic}
-      />
-      <div
-        style={{
-          width: 'calc(100% - 50px)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-        }}
-      >
-        <Typography variant="subtitle" sx={{ fontSize: '16px', fontWeight: unreadChat && 'bold', }}>
-          {data.username}
-        </Typography>
+    <div onClick={handleClick} className="chat-preview-card">
+      <div style={{position: 'relative'}}>
+        <Avatar
+          sx={{ width: 45, height: 45, color: 'white' }}
+          alt={data.otherUser.username}
+          src={data.otherUser.profile_pic}
+        />
         <Typography
-          variant="subtitle2"
+          variant="subtitle"
           sx={{
-            fontSize: '13px',
-            opacity: unreadChat ? 1 : 0.75,
-            textAlign: 'left',
-            textOverflow: 'ellipsis !important',
-            maxWidth: '130px',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
+            fontSize: '16px',
             fontWeight: unreadChat && 'bold',
+            position: 'absolute !important',
+            top: 0,
+            left: '60px',
           }}
         >
-          {data.latest_message.sender_id === user.id && 'You: '}{' '}
-          {data.latest_message.text}
+          {data.otherUser.username}
         </Typography>
       </div>
       <Typography
+        variant="subtitle2"
+        sx={{
+          marginBottom: '-24px',
+          fontSize: '13px',
+          opacity: unreadChat ? 1 : 0.75,
+          textAlign: 'left',
+          textOverflow: 'ellipsis',
+          flex: 1,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          fontWeight: unreadChat && 'bold',
+        }}
+      >
+        {data.latest_message.sender_id === user.id && 'You: '}{' '}
+        {data.latest_message.text}
+      </Typography>
+      {/* </div> */}
+      <Typography
         variant="subtitle"
-        sx={{ fontSize: '12px', opacity: unreadChat ? 1 : 0.6, whiteSpace: 'nowrap' }}
+        sx={{
+          fontSize: '12px',
+          opacity: unreadChat ? 1 : 0.6,
+          whiteSpace: 'nowrap',
+        }}
       >
         {formatDate(data.latest_message.createdAt)}
       </Typography>
-    </Button>
+    </div>
   )
 }
 
