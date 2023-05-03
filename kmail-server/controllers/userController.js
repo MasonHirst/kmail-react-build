@@ -156,6 +156,9 @@ module.exports = {
 
   getAllMessages: async (req, res) => {
     const { id, offset, limit } = req.params
+    console.log(id)
+    console.log(offset)
+    console.log(limit)
     try {
       const messages = await Message.findAll({
         where: { chatId: id },

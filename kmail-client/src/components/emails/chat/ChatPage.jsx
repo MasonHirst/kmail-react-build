@@ -214,11 +214,18 @@ const ChatPage = ({rightChatRef}) => {
     } else if (div.scrollTop > -700 && showDownBtn) {
       setShowDownBtn(false)
     }
-    if (messagesEnd) return
-    if (div.scrollTop === div.clientHeight - div.scrollHeight) {
+    if (messagesEnd) return console.log(messagesEnd)
+    console.log(div.scrollTop, div.clientHeight - div.scrollHeight)
+    if (div.scrollTop <= div.clientHeight - div.scrollHeight + 10) {
       setPageOffset(pageOffset + 1)
     }
   }
+  
+  useEffect(() => {
+    setPageOffset(0)
+    setMessagesEnd(false)
+  },[chat_id])
+
   useEffect(() => {
     setTimeout(() => {
       if (!messages.length) return
@@ -226,7 +233,7 @@ const ChatPage = ({rightChatRef}) => {
       if (div.clientHeight === div.scrollHeight) {
         setPageOffset(pageOffset + 1)
       }
-    }, 250)
+    }, 350)
   }, [chat_id, messages])
 
   function handleScrollDown() {
@@ -256,12 +263,12 @@ const ChatPage = ({rightChatRef}) => {
 
   useEffect(() => {
     setIsLightLoading(true)
-    console.log('otherUser: ', otherUser.username)
+    // console.log('chat_id: ', chat_id)
     axios
       .get(`chat/${chat_id}/messages/${pageOffset}/${limit}`)
       .then(({ data }) => {
         setTimeout(() => {
-          console.log('data: ', data)
+          // console.log('data: ', data)
           setIsLightLoading(false)
           if (data.length < 50) setMessagesEnd(true)
           if (!data.length) {
