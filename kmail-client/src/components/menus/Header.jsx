@@ -103,7 +103,7 @@ const Header = () => {
         </Typography>
       </Box>
 
-      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', border: '1px solid red' }} className="header-bar-right">
+      <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end', }} className="header-bar-right">
         <div
           className={
             searchFocus
