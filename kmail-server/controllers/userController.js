@@ -66,7 +66,6 @@ module.exports = {
         return res.status(200).send(findChat)
       } else {
         const createChat = await Chat.create({
-          last_message: null,
           user1: userId,
           user2: recipient,
         })
@@ -156,9 +155,6 @@ module.exports = {
 
   getAllMessages: async (req, res) => {
     const { id, offset, limit } = req.params
-    console.log(id)
-    console.log(offset)
-    console.log(limit)
     try {
       const messages = await Message.findAll({
         where: { chatId: id },

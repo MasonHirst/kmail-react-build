@@ -23,8 +23,8 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState()
   const [hideChatsNotifications, setHideChatsNotifications] = useState(true)
   const [conversations, setConversations] = useState([])
-  const [showingLeftChat, setShowingLeftChat] = useState(true)
-
+  const [leftChatRef, setLeftChatRef] = useState(null)
+  const [rightChatRef, setRightChatRef] = useState(null)
   console.success = function(message) {
     console.log("%c✅ " + message, "color: #04A57D; font-weight: bold;")
   }
@@ -33,21 +33,13 @@ export const SocketProvider = ({ children }) => {
     console.log("%c⚠️ " + message, "color: yellow; font-weight: bold;")
   }
 
-  let rightRef
-  let leftRef
-  function toggleLeftOrRightChat(ref) {
-    if (showingLeftChat) {
-      console.log('showLeftChat', ref)
-      rightRef = ref
-      rightRef.classList.add('display-none')
-      leftRef.classList.remove('display-none')
-      setShowingLeftChat(!showingLeftChat)
+  function toggleLeftOrRightChat() {
+    if (leftChatRef.classList.contains('display-none')) {
+      // rightRef.classList.add('display-none')
+      // leftRef.classList.remove('display-none')
     } else {
-      console.log('!showLeftChat', ref)
-      leftRef = ref
-      leftRef.classList.add('display-none')
-      rightRef.classList.remove('display-none')
-      setShowingLeftChat(!showingLeftChat)
+      // leftRef.classList.add('display-none')
+      // rightRef.classList.remove('display-none')
     }
   }
 
@@ -130,6 +122,8 @@ export const SocketProvider = ({ children }) => {
         setConversations,
         getConversations,
         toggleLeftOrRightChat,
+        setLeftChatRef,
+        setRightChatRef,
       }}
     >
       {children}

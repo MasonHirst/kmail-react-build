@@ -28,17 +28,20 @@ const NewChatPage = () => {
         .then(({data}) => {
           setTimeout(() => {
             setIsLightLoading(false)
-          }, 350)
+          }, 150)
           setOtherUsers(data)
           if (data.length < 1) setSearchMessage('No results')
         })
         .catch(err => {
           setTimeout(() => {
             setIsLightLoading(false)
-          }, 350)
+          }, 150)
           console.error('ERROR IN NEWCHATPAGE: ', err)
         })
-    } setSearchMessage('Search for a username')
+    } else {
+      setOtherUsers([])
+      setSearchMessage('Search for a username')
+    }
   }, [searchInput])
 
   let mappedContacts

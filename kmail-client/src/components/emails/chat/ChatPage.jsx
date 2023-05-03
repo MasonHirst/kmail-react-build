@@ -214,13 +214,12 @@ const ChatPage = ({rightChatRef}) => {
     } else if (div.scrollTop > -700 && showDownBtn) {
       setShowDownBtn(false)
     }
-    if (messagesEnd) return console.log(messagesEnd)
-    console.log(div.scrollTop, div.clientHeight - div.scrollHeight)
+    if (messagesEnd) return
     if (div.scrollTop <= div.clientHeight - div.scrollHeight + 10) {
       setPageOffset(pageOffset + 1)
     }
   }
-  
+
   useEffect(() => {
     setPageOffset(0)
     setMessagesEnd(false)
