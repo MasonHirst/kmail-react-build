@@ -22,7 +22,7 @@ module.exports = {
   startSocketServer: async () => {
     wss.on('connection', function connection(ws, req) {
       try {
-        // console.log('connection happened')
+        console.log('connection happened')
         ws.on('error', console.error)
         ws.on('message', async function message(data, isBinary) {
           const { event, body } = JSON.parse(data)
