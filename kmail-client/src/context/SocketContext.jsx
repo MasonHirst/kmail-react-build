@@ -37,13 +37,13 @@ export const SocketProvider = ({ children }) => {
   let leftRef
   function toggleLeftOrRightChat(ref) {
     if (showingLeftChat) {
-      console.log('showLeftChat', ref)
+      // console.log('showLeftChat', ref)
       rightRef = ref
       rightRef.classList.add('display-none')
       leftRef.classList.remove('display-none')
       setShowingLeftChat(!showingLeftChat)
     } else {
-      console.log('!showLeftChat', ref)
+      // console.log('!showLeftChat', ref)
       leftRef = ref
       leftRef.classList.add('display-none')
       rightRef.classList.remove('display-none')

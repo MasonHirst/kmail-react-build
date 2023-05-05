@@ -256,12 +256,12 @@ const ChatPage = ({rightChatRef}) => {
 
   useEffect(() => {
     setIsLightLoading(true)
-    console.log('otherUser: ', otherUser.username)
+    // console.log('otherUser: ', otherUser.username)
     axios
       .get(`chat/${chat_id}/messages/${pageOffset}/${limit}`)
       .then(({ data }) => {
         setTimeout(() => {
-          console.log('data: ', data)
+          // console.log('data: ', data)
           setIsLightLoading(false)
           if (data.length < 50) setMessagesEnd(true)
           if (!data.length) {
