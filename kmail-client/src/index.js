@@ -9,6 +9,7 @@ import axios from 'axios'
 import { Authentication } from './context/AuthenticationContext'
 
 axios.defaults.baseURL = 'http://localhost:8080/'
+// axios.defaults.baseURL = 'https://kmail.fly.dev/'
 // axios.defaults.headers.common['Authorization'] =
 //   localStorage.getItem('jwtAccessToken')
 
