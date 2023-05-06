@@ -59,7 +59,7 @@ const ChatPage = ({rightChatRef}) => {
     return () => {
       document.title = 'Kmail - chats'
     }
-  }, [, otherUser])
+  }, [otherUser])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
