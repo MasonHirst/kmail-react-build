@@ -1,5 +1,4 @@
 const { WebSocketServer, WebSocket } = require('ws')
-const wss = new WebSocketServer({ port: 8085 })
 const { verifyAccessToken } = require('./authController')
 
 const connections = {}
@@ -17,9 +16,10 @@ function sendMessageToClient(recipientId, event_type, message) {
   }
 }
 
-module.exports = {
-  sendMessageToClient,
-  startSocketServer: async () => {
+async function startServer(app, port, db) {
+  db.sync().then(() => {
+    const wss = new WebSocketServer({server: app.listen(port)})
+    wss.on('listening', () => console.log('SERVER LISTENING ON PORT 8080'))
     wss.on('connection', function connection(ws, req) {
       try {
         console.log('connection happened')
@@ -44,5 +44,10 @@ module.exports = {
         console.error(err)
       }
     })
-  },
+  })
+}
+
+module.exports = {
+  sendMessageToClient,
+  startServer,
 }

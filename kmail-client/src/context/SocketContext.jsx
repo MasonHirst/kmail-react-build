@@ -66,8 +66,20 @@ export const SocketProvider = ({ children }) => {
   let connectCounter = 0
   useEffect(() => {
     function connectClient() {
-      const ws = new WebSocket('ws://localhost:8085')
-      // const ws = new WebSocket('wss://kmail.fly.dev:8085')
+
+      let serverUrl
+      let scheme = 'ws'
+      let location = document.location
+      if (location.protocol === 'https:') {
+        scheme += 's'
+      }
+      serverUrl = `${scheme}://${location.hostname}:${location.port}`
+      if (process.env.NODE_ENV === 'development') {
+        serverUrl = 'ws://localhost:8080'
+      }
+      const ws = new WebSocket(
+        `${serverUrl}?token=${localStorage.getItem('jwtAccessToken')}`
+      )
 
 
       const token = localStorage.getItem('jwtAccessToken')
