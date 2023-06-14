@@ -4,3 +4,5 @@ node_modules
 token.json
 credentials.json
 authObject.json
+/build
+build
