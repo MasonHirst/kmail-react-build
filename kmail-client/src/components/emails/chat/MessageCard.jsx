@@ -160,8 +160,8 @@ const MessageCard = ({
             {notUser && (
               <Avatar
                 sx={{
-                  width: {xs: 30, sm: 46},
-                  height: {xs: 30, sm: 46},
+                  width: {xs: 30, sm: 36},
+                  height: {xs: 30, sm: 36},
                   color: 'white',
                   marginRight: '5px',
                   marginBottom: message.reactions.length ? '12px' : '0',

@@ -20,7 +20,7 @@ const AllEmails = () => {
       <Routes>
         <Route path="/inbox" element={<BasicInbox />} />
         <Route path="chats/*" element={<AllChats />} />
-        <Route path="*" element={<Navigate to="/inbox" />} />
+        <Route path="*" element={<Navigate to="/chats" />} />
       </Routes>
     </Paper>
   )

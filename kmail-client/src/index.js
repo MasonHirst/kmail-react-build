@@ -8,18 +8,17 @@ import { DarkModeProvider, DarkModeContext } from './context/DarkThemeContext'
 import axios from 'axios'
 import { Authentication } from './context/AuthenticationContext'
 
-axios.defaults.baseURL = 'http://localhost:8080/'
-// axios.defaults.baseURL = 'https://kmail.fly.dev/'
-// axios.defaults.headers.common['Authorization'] =
-//   localStorage.getItem('jwtAccessToken')
+const serverUrl =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8080/'
+    : document.location.origin
+axios.defaults.baseURL = serverUrl
 
-axios.interceptors.request.use(
-  function (config) {
-    config.headers.Authorization = localStorage.getItem('jwtAccessToken')
-    // Do something before request is sent
-    return config
-  },
-)
+axios.interceptors.request.use(function (config) {
+  config.headers.Authorization = localStorage.getItem('jwtAccessToken')
+  // Do something before request is sent
+  return config
+})
 
 const darkModeOn = createTheme({
   palette: {
@@ -55,7 +54,7 @@ root.render(
           <ThemeProvider theme={context.darkTheme ? darkModeOn : lightModeOn}>
             <CssBaseline />
             <Authentication>
-                <App />
+              <App />
             </Authentication>
           </ThemeProvider>
         )}

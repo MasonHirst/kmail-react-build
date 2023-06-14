@@ -23,8 +23,8 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState()
   const [hideChatsNotifications, setHideChatsNotifications] = useState(true)
   const [conversations, setConversations] = useState([])
-  const [showingLeftChat, setShowingLeftChat] = useState(true)
-
+  const [leftChatRef, setLeftChatRef] = useState(null)
+  const [rightChatRef, setRightChatRef] = useState(null)
   console.success = function(message) {
     console.log("%c✅ " + message, "color: #04A57D; font-weight: bold;")
   }
@@ -33,21 +33,13 @@ export const SocketProvider = ({ children }) => {
     console.log("%c⚠️ " + message, "color: yellow; font-weight: bold;")
   }
 
-  let rightRef
-  let leftRef
-  function toggleLeftOrRightChat(ref) {
-    if (showingLeftChat) {
-      // console.log('showLeftChat', ref)
-      rightRef = ref
-      rightRef.classList.add('display-none')
-      leftRef.classList.remove('display-none')
-      setShowingLeftChat(!showingLeftChat)
+  function toggleLeftOrRightChat() {
+    if (leftChatRef.classList.contains('display-none')) {
+      // rightRef.classList.add('display-none')
+      // leftRef.classList.remove('display-none')
     } else {
-      // console.log('!showLeftChat', ref)
-      leftRef = ref
-      leftRef.classList.add('display-none')
-      rightRef.classList.remove('display-none')
-      setShowingLeftChat(!showingLeftChat)
+      // leftRef.classList.add('display-none')
+      // rightRef.classList.remove('display-none')
     }
   }
 
@@ -74,8 +66,20 @@ export const SocketProvider = ({ children }) => {
   let connectCounter = 0
   useEffect(() => {
     function connectClient() {
-      const ws = new WebSocket('ws://localhost:8085')
-      // const ws = new WebSocket('wss://kmail.fly.dev:8085')
+
+      let serverUrl
+      let scheme = 'ws'
+      let location = document.location
+      if (location.protocol === 'https:') {
+        scheme += 's'
+      }
+      serverUrl = `${scheme}://${location.hostname}:${location.port}`
+      if (process.env.NODE_ENV === 'development') {
+        serverUrl = 'ws://localhost:8080'
+      }
+      const ws = new WebSocket(
+        `${serverUrl}?token=${localStorage.getItem('jwtAccessToken')}`
+      )
       const token = localStorage.getItem('jwtAccessToken')
 
       ws.addEventListener('open', function () {
@@ -131,6 +135,8 @@ export const SocketProvider = ({ children }) => {
         setConversations,
         getConversations,
         toggleLeftOrRightChat,
+        setLeftChatRef,
+        setRightChatRef,
       }}
     >
       {children}

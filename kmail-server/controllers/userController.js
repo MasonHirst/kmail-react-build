@@ -66,7 +66,6 @@ module.exports = {
         return res.status(200).send(findChat)
       } else {
         const createChat = await Chat.create({
-          last_message: null,
           user1: userId,
           user2: recipient,
         })

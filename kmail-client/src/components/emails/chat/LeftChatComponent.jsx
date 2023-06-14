@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useState, useEffect, useRef } from 'react'
 import { DarkModeContext } from '../../../context/DarkThemeContext'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { SocketContext } from '../../../context/SocketContext'
@@ -14,27 +14,32 @@ const LeftChatComponent = () => {
     conversations,
     setConversations,
     getConversations,
+    setLeftChatRef,
   } = useContext(SocketContext)
   const location = useLocation()
   const { setChatId, chatId, user } = useContext(AuthContext)
   const navigate = useNavigate()
   const { darkTheme } = useContext(DarkModeContext)
-
-  // loop through the conversations array and if any of the conversations have a latest_message with a recipient_read value of false and a sender_id that is not the user's id, then return true
+  const leftChatRef = useRef()
   
   const mappedConversations = conversations.map((conv, index) => {
     return <ChatPreviewCard  key={index} data={conv} />
   })
 
   useEffect(() => {
-    getConversations()
-  }, [])
+
+  }, [leftChatRef])
+  
+  // useEffect(() => {
+  //   getConversations()
+  // }, [])
 
   useEffect(() => {
     if (!message || !conversations.length) return
     const newArr = [...conversations]
     const index = newArr.findIndex((item) => item.chat.id === message.chatId)
     const obj = newArr[index]
+    if (!obj) return getConversations() // if the conversation doesn't exist yet, get all conversations again
     obj.latest_message = message
     newArr.splice(index, 1)
     newArr.unshift(obj)

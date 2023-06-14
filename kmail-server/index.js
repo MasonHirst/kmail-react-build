@@ -92,14 +92,10 @@ app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '.', 'build', 'index.html'))
 })
 
-//! Socket server
-const { startSocketServer } = require('./controllers/socketController')
-startSocketServer()
+//! server
+const { startServer } = require('./controllers/socketController')
+const SERVER_PORT = process.env.SERVER_PORT || 8080
+startServer(app, SERVER_PORT, db)
 
 //! Server listen
-const { SERVER_PORT } = process.env
-db.sync().then(() => {
-  app.listen(SERVER_PORT, () =>
-    console.log(`SERVER RUNNING ON SERVER_PORT ${SERVER_PORT}`)
-  )
-})
+

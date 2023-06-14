@@ -1,3 +1,10 @@
 - if you navigate directly to the login/password page (skipping the login page), 
 it errors because the state variable that was passed by react-router does not 
 exist.
+
+add logic that increases the fontsize if the message is only emojis, or maybe increases it slightly whenever there is an emoji
+
+when you switch conversations, if you switch from and to a conversation with lots of messages,
+the messages will be paginated when they shouldn't be.
+
+make an actual photo uploader instead of a url input
