@@ -59,7 +59,7 @@ const ChatPage = ({rightChatRef}) => {
     return () => {
       document.title = 'Kmail - chats'
     }
-  }, [, otherUser])
+  }, [otherUser])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -262,7 +262,6 @@ const ChatPage = ({rightChatRef}) => {
 
   useEffect(() => {
     setIsLightLoading(true)
-    // console.log('chat_id: ', chat_id)
     axios
       .get(`chat/${chat_id}/messages/${pageOffset}/${limit}`)
       .then(({ data }) => {

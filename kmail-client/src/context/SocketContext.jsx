@@ -80,8 +80,6 @@ export const SocketProvider = ({ children }) => {
       const ws = new WebSocket(
         `${serverUrl}?token=${localStorage.getItem('jwtAccessToken')}`
       )
-
-
       const token = localStorage.getItem('jwtAccessToken')
 
       ws.addEventListener('open', function () {
