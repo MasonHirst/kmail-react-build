@@ -8,3 +8,7 @@ when you switch conversations, if you switch from and to a conversation with lot
 the messages will be paginated when they shouldn't be.
 
 make an actual photo uploader instead of a url input
+
+make the message input expand to a max of 4 lines
+
+if you open the menu to react to a message, and you recieve a message, the menu will glitch up to the top left corner

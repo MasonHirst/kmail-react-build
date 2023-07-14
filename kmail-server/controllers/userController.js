@@ -7,6 +7,19 @@ require('dotenv').config()
 const { Op } = require('sequelize')
 const { Sequelize } = require('sequelize')
 
+const cloudinary = require('cloudinary')
+
+const {
+  CLOUDINARY_SECRET,
+  CLOUDINARY_KEY,
+  CLOUDINARY_NAME,
+} = process.env
+cloudinary.config({
+  cloud_name: CLOUDINARY_NAME,
+  api_key: CLOUDINARY_KEY,
+  api_secret: CLOUDINARY_SECRET,
+})
+
 module.exports = {
   updateDarkMode: async (req, res) => {
     const { darkMode, userId } = req.body
@@ -308,6 +321,50 @@ module.exports = {
       res.send(readMessages)
     } catch (err) {
       res.status(403).send(err)
+    }
+  },
+
+  uploadCloudinaryImage: async (req, res) => {
+    const { image, userId } = req.body
+
+    try {
+      cloudinary.v2.uploader.upload(
+        image,
+        { public_id: userId, overwrite: true },
+        function (error, result) {
+          if (error) {
+            console.error(error)
+            res.status(500).send(error)
+          } else {
+            console.log(result)
+            res.send(result.url)
+          }
+        }
+      )
+    } catch (err) {
+      console.error(err)
+      res.status(500).send(err)
+    }
+  },
+
+  deleteCloudinaryImage: async (req, res) => {
+    const { localUserToken } = req.body
+    try {
+      cloudinary.v2.uploader.destroy(
+        localUserToken,
+        function (deleteError, deleteResult) {
+          if (deleteError) {
+            console.error(deleteError)
+            res.status(500).send(deleteError)
+          } else {
+            console.log(deleteResult)
+            res.send(deleteResult)
+          }
+        }
+      )
+    } catch (err) {
+      console.error(err)
+      res.status(500).send(err)
     }
   },
 }

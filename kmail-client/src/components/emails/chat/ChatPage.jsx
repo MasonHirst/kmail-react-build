@@ -266,7 +266,6 @@ const ChatPage = ({rightChatRef}) => {
       .get(`chat/${chat_id}/messages/${pageOffset}/${limit}`)
       .then(({ data }) => {
         setTimeout(() => {
-          // console.log('data: ', data)
           setIsLightLoading(false)
           if (data.length < 50) setMessagesEnd(true)
           if (!data.length) {
@@ -531,6 +530,7 @@ const ChatPage = ({rightChatRef}) => {
           <SendIcon />
         </IconButton>
       </form>
+
       <Dialog
         onClose={() => setShowEmojiDialog(false)}
         PaperProps={{
