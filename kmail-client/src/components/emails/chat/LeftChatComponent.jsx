@@ -29,10 +29,6 @@ const LeftChatComponent = () => {
   useEffect(() => {
 
   }, [leftChatRef])
-  
-  // useEffect(() => {
-  //   getConversations()
-  // }, [])
 
   useEffect(() => {
     if (!message || !conversations.length) return
